@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Nexode.Core</RootNamespace>
+    <AssemblyName>Nexode.Core</AssemblyName>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexode.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Argon2id key derivation (managed, no native library) -->
+    <PackageReference Include="BouncyCastle.Cryptography" />
+  </ItemGroup>
+
+</Project>

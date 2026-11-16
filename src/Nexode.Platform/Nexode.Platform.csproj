@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Nexode.Platform</RootNamespace>
+    <AssemblyName>Nexode.Platform</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nexode.Core\Nexode.Core.csproj" />
+  </ItemGroup>
+
+</Project>

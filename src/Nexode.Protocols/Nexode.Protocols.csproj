@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Nexode.Protocols</RootNamespace>
+    <AssemblyName>Nexode.Protocols</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nexode.Protocols.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- SSH and SFTP (MIT) -->
+    <PackageReference Include="SSH.NET" />
+    <!-- Ed25519 key generation (MIT; already a dependency of SSH.NET) -->
+    <PackageReference Include="BouncyCastle.Cryptography" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nexode.Core\Nexode.Core.csproj" />
+  </ItemGroup>
+
+</Project>
