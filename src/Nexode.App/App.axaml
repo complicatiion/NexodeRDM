@@ -1,0 +1,28 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Nexode.App.App"
+             Name="Nexode"
+             RequestedThemeVariant="Dark">
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://Nexode/Theme/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas, DejaVu Sans Mono, Menlo, monospace</FontFamily>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <!-- Accent instead of system blue; values are replaced at runtime by ThemeService -->
+        <ColorPaletteResources x:Key="Dark" Accent="#FF573CFA" RegionColor="#FF24222F" BaseHigh="#FFECEBF2" />
+        <ColorPaletteResources x:Key="Light" Accent="#FF573CFA" RegionColor="#FFF3F2F7" BaseHigh="#FF1C1A27" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+    <StyleInclude Source="avares://Nexode/Theme/Styles.axaml" />
+  </Application.Styles>
+
+</Application>
