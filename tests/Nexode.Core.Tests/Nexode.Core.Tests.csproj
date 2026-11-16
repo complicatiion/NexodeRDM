@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Nexode.Core\Nexode.Core.csproj" />
+    <ProjectReference Include="..\..\src\Nexode.Storage\Nexode.Storage.csproj" />
+    <ProjectReference Include="..\..\src\Nexode.Platform\Nexode.Platform.csproj" />
+  </ItemGroup>
+
+</Project>
