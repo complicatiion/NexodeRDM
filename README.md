@@ -1,7 +1,5 @@
 # Nexode RDM
 
-**A modern, open-source remote connection manager for admins in one place for servers, hosts, web panels and credentials.**
-
 ![Nexode](/preview/favicon.png)
 
 ![Nexode RDM](/preview/preview-collage.png)
