@@ -1,0 +1,398 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Nexode.App.ViewModels"
+        xmlns:ctl="using:Nexode.App.Controls"
+        xmlns:model="using:Nexode.Core.Model"
+        x:Class="Nexode.App.Views.EntryEditorWindow"
+        x:DataType="vm:EntryEditorViewModel"
+        Title="{Binding Title}"
+        Icon="/Assets/nexode.ico"
+        Width="880" Height="660" MinWidth="560" MinHeight="460"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{DynamicResource B.BgContent}">
+  <DockPanel Margin="22,18,22,16">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,12">
+      <Border Width="40" Height="40" CornerRadius="10" Background="{DynamicResource B.AccentSoft}" Margin="0,0,14,0">
+        <ctl:LineIcon Icon="{Binding IconPreview}" Size="20" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+      </Border>
+      <TextBlock Grid.Column="1" Text="{Binding Title}" Classes="h2" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+      <ToggleButton Grid.Column="2" Classes="heart" IsChecked="{Binding IsFavorite}" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip.Tip="{DynamicResource S.Editor.Favorite}">
+        <ctl:LineIcon Icon="heart" Size="19" />
+      </ToggleButton>
+      <ComboBox Grid.Column="3" ItemsSource="{Binding Kinds}" SelectedItem="{Binding Kind}" IsEnabled="{Binding CanChangeKind}" MinWidth="170" VerticalAlignment="Center">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:IOption">
+            <ctl:IconLabel Icon="{Binding Icon}" Text="{Binding Text}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </Grid>
+
+    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
+      <TextBlock Text="{Binding Error}" Classes="danger" IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" TextWrapping="Wrap" />
+      <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+        <Button IsCancel="True" Click="CancelClick" MinWidth="100" HorizontalContentAlignment="Center">
+          <ctl:IconLabel Icon="x" Text="{DynamicResource S.Cancel}" />
+        </Button>
+        <Button Classes="primary" IsDefault="True" Click="SaveClick" MinWidth="110" HorizontalContentAlignment="Center">
+          <ctl:IconLabel Icon="save" Text="{DynamicResource S.Save}" />
+        </Button>
+      </StackPanel>
+    </StackPanel>
+
+    <TabControl Classes="pills">
+      <!-- General -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="info" Text="{DynamicResource S.Editor.General}" /></TabItem.Header>
+        <ScrollViewer>
+          <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,14,8,8">
+            <TextBlock Classes="label" Text="{DynamicResource S.Field.Name}" />
+            <TextBox x:Name="NameBox" Grid.Column="1" Text="{Binding Name}" />
+            <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Field.Host}" IsVisible="{Binding HasHost}" />
+            <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto,90" IsVisible="{Binding HasHost}">
+              <TextBox Text="{Binding Host}" Classes="mono" PlaceholderText="{DynamicResource S.Editor.HostWatermark}" />
+              <TextBlock Grid.Column="1" Text="{DynamicResource S.Field.Port}" Classes="label" VerticalAlignment="Center" Margin="12,0,8,0" IsVisible="{Binding HasPort}" />
+              <TextBox Grid.Column="2" Text="{Binding Port}" Classes="mono" PlaceholderText="{Binding DefaultPortText}" IsVisible="{Binding HasPort}" />
+            </Grid>
+            <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.Field.Url}" IsVisible="{Binding HasUrl}" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Url}" Classes="mono" PlaceholderText="{Binding UrlWatermark}" IsVisible="{Binding HasUrl}" />
+            <TextBlock Grid.Row="3" Classes="label" Text="{DynamicResource S.Field.Category}" />
+            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Categories}" SelectedItem="{Binding Category}" HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:IOption">
+                  <ctl:IconLabel Icon="{Binding Icon}" Text="{Binding Text}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Row="4" Classes="label" Text="{DynamicResource S.Field.Environment}" />
+            <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Environments}" SelectedItem="{Binding Environment}" HorizontalAlignment="Stretch" />
+            <TextBlock Grid.Row="5" Classes="label" Text="{DynamicResource S.Field.Os}" />
+            <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding OsList}" SelectedItem="{Binding Os}" HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:IOption">
+                  <ctl:IconLabel Icon="{Binding Icon}" Text="{Binding Text}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Row="6" Classes="label" Text="{DynamicResource S.Field.Tags}" />
+            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Tags}" PlaceholderText="{DynamicResource S.Editor.TagsWatermark}" />
+            <TextBlock Grid.Row="7" Classes="label" Text="{DynamicResource S.Field.Description}" VerticalAlignment="Top" Margin="0,6,16,10" />
+            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Description}" />
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Credentials -->
+      <TabItem IsVisible="{Binding HasCredentials}">
+        <TabItem.Header><ctl:IconLabel Icon="key-round" Text="{DynamicResource S.Editor.Credentials}" /></TabItem.Header>
+        <ScrollViewer>
+          <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="0,14,8,8">
+            <TextBlock Classes="label" Text="{DynamicResource S.Editor.CredentialMode}" IsVisible="{Binding CanChooseMode}" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding CredentialModes}" SelectedItem="{Binding CredentialMode}" HorizontalAlignment="Stretch" IsVisible="{Binding CanChooseMode}" />
+            <Border Grid.Row="1" Grid.Column="1" Classes="notice" IsVisible="{Binding IsInheritMode}" Margin="0,0,0,10">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ctl:LineIcon Icon="info" Size="15" Foreground="{DynamicResource B.AccentText}" />
+                <TextBlock Text="{Binding InheritInfo}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+            <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.Editor.Profile}" IsVisible="{Binding IsProfileMode}" />
+            <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile}" HorizontalAlignment="Stretch" IsVisible="{Binding IsProfileMode}"
+                      PlaceholderText="{DynamicResource S.Editor.ProfileNone}" />
+            <TextBlock Grid.Row="3" Classes="label" Text="{DynamicResource S.Field.Username}" IsVisible="{Binding HasCredentialFields}" />
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Username}" Classes="mono" IsVisible="{Binding HasCredentialFields}" />
+            <TextBlock Grid.Row="4" Classes="label" Text="{DynamicResource S.Field.Domain}" IsVisible="{Binding HasCredentialFields}" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Domain}" Classes="mono" IsVisible="{Binding HasCredentialFields}" />
+            <TextBlock Grid.Row="5" Classes="label" Text="{DynamicResource S.Field.Password}" IsVisible="{Binding HasPasswordField}" />
+            <Grid Grid.Row="5" Grid.Column="1" ColumnDefinitions="*,Auto,Auto,Auto" IsVisible="{Binding HasPasswordField}">
+              <TextBox x:Name="PasswordBox" Text="{Binding Password}" PasswordChar="•" Classes="mono" PlaceholderText="{Binding PasswordWatermark}" />
+              <ToggleButton Grid.Column="1" x:Name="RevealToggle" Classes="icon" Margin="6,0,0,0" Click="RevealClick" ToolTip.Tip="{DynamicResource S.Entry.Reveal}">
+                <ctl:LineIcon Icon="eye" Size="16" />
+              </ToggleButton>
+              <Button Grid.Column="2" Classes="icon" Click="GenerateClick" ToolTip.Tip="{DynamicResource S.Editor.Generate}">
+                <ctl:LineIcon Icon="wand-sparkles" Size="16" />
+              </Button>
+              <Button Grid.Column="3" Classes="icon" Click="ClearPasswordClick" IsVisible="{Binding HadPassword}" ToolTip.Tip="{DynamicResource S.Editor.ClearPassword}">
+                <ctl:LineIcon Icon="x" Size="16" />
+              </Button>
+            </Grid>
+            <StackPanel Grid.Row="6" Grid.Column="1" Spacing="2">
+              <ctl:Hint Text="{DynamicResource S.Editor.VaultHint}" />
+              <ctl:Hint Text="{DynamicResource S.Editor.CredInfo}" IsVisible="{Binding CanChooseMode}" />
+            </StackPanel>
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Protocol -->
+      <TabItem IsVisible="{Binding HasProtocolOptions}">
+        <TabItem.Header><ctl:IconLabel Icon="settings" Text="{DynamicResource S.Editor.Options}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Margin="0,14,8,8">
+            <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto" IsVisible="{Binding IsHostKind}">
+              <TextBlock Classes="label" Text="{DynamicResource S.Field.Ip}" />
+              <TextBox Grid.Column="1" Text="{Binding Ip}" Classes="mono" PlaceholderText="10.0.0.10" />
+            </Grid>
+            <!-- Serial console -->
+            <StackPanel IsVisible="{Binding IsSerial}">
+              <Grid Classes="form" ColumnDefinitions="150,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Serial.Port}" />
+                <TextBox Grid.Column="1" Text="{Binding SerialPort}" Classes="mono" PlaceholderText="COM3 · /dev/ttyUSB0" />
+                <DropDownButton Grid.Column="2" Margin="6,0,0,0" ToolTip.Tip="{DynamicResource S.Serial.Detect}">
+                  <DropDownButton.Content><ctl:LineIcon Icon="search" Size="15" /></DropDownButton.Content>
+                  <DropDownButton.Flyout>
+                    <Flyout Placement="BottomEdgeAlignedRight">
+                      <StackPanel MinWidth="200" Spacing="2" x:Name="SerialPortList" />
+                    </Flyout>
+                  </DropDownButton.Flyout>
+                </DropDownButton>
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Serial.Baud}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding BaudRates}" SelectedItem="{Binding SerialBaud}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.Serial.DataBits}" />
+                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding DataBitsList}" SelectedItem="{Binding SerialDataBits}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="3" Classes="label" Text="{DynamicResource S.Serial.Parity}" />
+                <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding ParityList}" SelectedIndex="{Binding SerialParityIndex}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="4" Classes="label" Text="{DynamicResource S.Serial.StopBits}" />
+                <ComboBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding StopBitsList}" SelectedItem="{Binding SerialStopBits}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="5" Classes="label" Text="{DynamicResource S.Serial.Flow}" />
+                <ComboBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding FlowList}" SelectedIndex="{Binding SerialFlowIndex}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="6" Classes="label" Text="{DynamicResource S.Serial.NewLine}" />
+                <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding NewLineList}" SelectedIndex="{Binding SerialNewLineIndex}" HorizontalAlignment="Stretch" />
+              </Grid>
+              <ctl:SettingRow Label="{DynamicResource S.Serial.Echo}"><ToggleSwitch IsChecked="{Binding SerialEcho}" /></ctl:SettingRow>
+              <ctl:Hint Text="{DynamicResource S.Serial.Hint}" />
+            </StackPanel>
+            <StackPanel IsVisible="{Binding IsRdp}">
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Setting.rdp.resolution}" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Resolutions}" SelectedItem="{Binding Resolution}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Editor.RdpColor}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ColorDepths}" SelectedItem="{Binding ColorDepth}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.Rdp.Audio}" />
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding AudioModes}" SelectedIndex="{Binding AudioIndex}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="3" Classes="label" Text="{DynamicResource S.Setting.rdp.gateway}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Gateway}" Classes="mono" PlaceholderText="rdgw.example.com" />
+              </Grid>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.GatewaySameCreds}" Icon="key-round" IsVisible="{Binding HasGateway}"><ToggleSwitch IsChecked="{Binding GatewaySameCreds}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.GatewayBypass}" Icon="network" IsVisible="{Binding HasGateway}"><ToggleSwitch IsChecked="{Binding GatewayBypass}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Setting.rdp.admin}"><ToggleSwitch IsChecked="{Binding RdpAdmin}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Editor.RdpClipboard}"><ToggleSwitch IsChecked="{Binding RdpClipboard}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.ClipboardFiles}" Icon="files" Info="{DynamicResource S.Rdp.ClipboardFilesInfo}" IsVisible="{Binding ShowClipboardFiles}"><ToggleSwitch IsChecked="{Binding RdpClipboardFiles}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Editor.RdpDrives}"><ToggleSwitch IsChecked="{Binding RdpDrives}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Editor.RdpPrinters}"><ToggleSwitch IsChecked="{Binding RdpPrinters}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.SmartCards}"><ToggleSwitch IsChecked="{Binding RdpSmartCards}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Editor.RdpSmartSizing}"><ToggleSwitch IsChecked="{Binding RdpSmartSizing}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.Fullscreen}" Icon="maximize"><ToggleSwitch IsChecked="{Binding RdpFullscreen}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.Monitor}" Icon="monitor-up"><ComboBox ItemsSource="{Binding Monitors}" SelectedIndex="{Binding RdpMonitorIndex}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.Span}" Icon="monitor" Info="{DynamicResource S.Rdp.SpanInfo}"><ToggleSwitch IsChecked="{Binding RdpSpan}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Rdp.SpanMonitors}" Icon="monitor-check" Info="{DynamicResource S.Rdp.SpanMonitorsInfo}" IsVisible="{Binding RdpSpan}">
+                <ItemsControl ItemsSource="{Binding SpanMonitors}">
+                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel ItemSpacing="10" LineSpacing="4" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:MonitorChoice">
+                      <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ctl:SettingRow>
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Rdp.HyperV}" />
+                <TextBox Grid.Column="1" Text="{Binding HyperVId}" Classes="mono" PlaceholderText="00000000-0000-0000-0000-000000000000" />
+                <ctl:Hint Grid.Row="1" Grid.Column="1" Text="{DynamicResource S.Rdp.HyperVHint}" />
+              </Grid>
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Rdp.RemoteApp}" />
+                <TextBox Grid.Column="1" Text="{Binding RemoteApp}" Classes="mono" PlaceholderText="||calc · C:\Windows\System32\notepad.exe" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Rdp.RemoteAppArgs}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding RemoteAppArgs}" Classes="mono" />
+                <ctl:Hint Grid.Row="2" Grid.Column="1" Text="{DynamicResource S.Rdp.RemoteAppHint}" />
+              </Grid>
+            </StackPanel>
+            <!-- PowerShell remoting -->
+            <StackPanel IsVisible="{Binding IsPowerShell}">
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Ps.Transport}" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding PsTransports}" SelectedIndex="{Binding PsTransportIndex}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Ps.Auth}" IsVisible="{Binding IsPsWinRm}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding PsAuths}" SelectedIndex="{Binding PsAuthIndex}" HorizontalAlignment="Stretch" IsVisible="{Binding IsPsWinRm}" />
+                <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.Ps.Configuration}" IsVisible="{Binding IsPsWinRm}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PsConfiguration}" Classes="mono" PlaceholderText="Microsoft.PowerShell" IsVisible="{Binding IsPsWinRm}" />
+              </Grid>
+              <ctl:SettingRow Label="{DynamicResource S.Ps.SkipCert}" Icon="shield-alert" IsVisible="{Binding IsPsSsl}"><ToggleSwitch IsChecked="{Binding PsSkipCertCheck}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Ps.Pwsh}" Icon="code-xml" Info="{DynamicResource S.Ps.PwshInfo}" IsVisible="{Binding IsWindowsHost}"><ToggleSwitch IsChecked="{Binding PsPwsh}" /></ctl:SettingRow>
+              <ctl:Hint Text="{DynamicResource S.Ps.Hint}" />
+            </StackPanel>
+            <!-- Web panel -->
+            <StackPanel IsVisible="{Binding IsWeb}">
+              <ctl:SettingRow Label="{DynamicResource S.Web.External}" Icon="external-link"><ToggleSwitch IsChecked="{Binding WebExternal}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Web.IgnoreCert}" Icon="shield-alert"><ToggleSwitch IsChecked="{Binding WebIgnoreCert}" /></ctl:SettingRow>
+              <ctl:Hint Text="{DynamicResource S.Web.IgnoreCertHint}" IsVisible="{Binding WebIgnoreCert}" />
+              <ctl:SettingRow Label="{DynamicResource S.Web.BasicAuth}" Icon="key-round"><ToggleSwitch IsChecked="{Binding WebBasicAuth}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Web.FormFill}" Icon="text-cursor-input"><ToggleSwitch IsChecked="{Binding WebFormFill}" /></ctl:SettingRow>
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" IsVisible="{Binding WebFormFill}">
+                <TextBlock Classes="label" Text="{DynamicResource S.Web.UserSelector}" />
+                <TextBox Grid.Column="1" Text="{Binding WebUserSelector}" Classes="mono" PlaceholderText="{DynamicResource S.Web.SelectorAuto}" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Web.PassSelector}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WebPassSelector}" Classes="mono" PlaceholderText="{DynamicResource S.Web.SelectorAuto}" />
+                <ctl:Hint Grid.Row="2" Grid.Column="1" Text="{DynamicResource S.Web.FormFillHint}" />
+              </Grid>
+            </StackPanel>
+            <!-- S3 -->
+            <StackPanel IsVisible="{Binding IsS3}">
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.S3.Bucket}" />
+                <TextBox Grid.Column="1" Text="{Binding S3Bucket}" Classes="mono" PlaceholderText="{DynamicResource S.S3.BucketWatermark}" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.S3.Region}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding S3Region}" Classes="mono" PlaceholderText="us-east-1" />
+                <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.S3.Style}" />
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding S3Styles}" SelectedIndex="{Binding S3StyleIndex}" HorizontalAlignment="Stretch" />
+              </Grid>
+              <ctl:SettingRow Label="{DynamicResource S.S3.Tls}" Icon="lock"><ToggleSwitch IsChecked="{Binding UseTls}" /></ctl:SettingRow>
+              <ctl:Hint Text="{DynamicResource S.S3.Hint}" />
+            </StackPanel>
+            <Grid Classes="form" ColumnDefinitions="150,*,Auto" RowDefinitions="Auto" IsVisible="{Binding IsSsh}">
+              <TextBlock Classes="label" Text="{DynamicResource S.Setting.ssh.keyFile}" />
+              <TextBox Grid.Column="1" Text="{Binding KeyFile}" Classes="mono" PlaceholderText="~/.ssh/id_ed25519" />
+              <Button Grid.Column="2" Margin="6,0,0,0" Click="KeyToolsClick" IsVisible="{Binding KeyToolsEnabled}" ToolTip.Tip="{DynamicResource S.Keys.EditorTip}">
+                <ctl:IconLabel Icon="key-round" Text="{DynamicResource S.Keys.EditorButton}" />
+              </Button>
+            </Grid>
+            <ctl:SettingRow Label="{DynamicResource S.Ssh.Agent}" Icon="key-square" Info="{DynamicResource S.Ssh.AgentInfo}" IsVisible="{Binding HasAgentOption}">
+              <ToggleSwitch IsChecked="{Binding SshAgent}" />
+            </ctl:SettingRow>
+            <ctl:Hint Text="{Binding AgentStatus}" IsVisible="{Binding ShowAgentStatus}" />
+            <StackPanel IsVisible="{Binding IsTerminal}">
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Editor.Terminal}" />
+                <TextBox Grid.Column="1" Text="{Binding TerminalType}" Classes="mono" PlaceholderText="xterm-256color" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Editor.StartCommand}" IsVisible="{Binding !IsTelnet}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding StartCommand}" Classes="mono" PlaceholderText="htop" IsVisible="{Binding !IsTelnet}" />
+              </Grid>
+              <ctl:SettingRow Label="{DynamicResource S.Editor.AutoLogin}" IsVisible="{Binding IsTelnet}"><ToggleSwitch IsChecked="{Binding AutoLogin}" /></ctl:SettingRow>
+            </StackPanel>
+            <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto" IsVisible="{Binding IsFileTransfer}">
+              <TextBlock Classes="label" Text="{DynamicResource S.Setting.remote.path}" />
+              <TextBox Grid.Column="1" Text="{Binding RemotePath}" Classes="mono" PlaceholderText="/var/www" />
+            </Grid>
+            <!-- Jump host -->
+            <StackPanel IsVisible="{Binding CanTunnel}" Margin="0,0,0,6">
+              <TextBlock Classes="section" Text="{DynamicResource S.Tunnel.Section}" Margin="0,4,0,8" />
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Tunnel.Via}" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding JumpHosts}" SelectedItem="{Binding JumpHost}" HorizontalAlignment="Stretch">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:IOption">
+                      <ctl:IconLabel Icon="{Binding Icon}" Text="{Binding Text}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </Grid>
+              <ctl:Hint Text="{DynamicResource S.Tunnel.Hint}" />
+            </StackPanel>
+            <!-- Wake-on-LAN -->
+            <StackPanel IsVisible="{Binding HasWol}" Margin="0,0,0,6">
+              <TextBlock Classes="section" Text="{DynamicResource S.Wol.Title}" Margin="0,4,0,8" />
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Field.Mac}" />
+                <TextBox Grid.Column="1" Text="{Binding Mac}" Classes="mono" PlaceholderText="00:11:22:33:44:55" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Wol.Broadcast}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding WolBroadcast}" Classes="mono" PlaceholderText="255.255.255.255" />
+                <TextBlock Grid.Row="2" Classes="label" Text="{DynamicResource S.Wol.Port}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding WolPort}" Classes="mono" PlaceholderText="9" />
+              </Grid>
+              <ctl:Hint Text="{DynamicResource S.Wol.Hint}" />
+            </StackPanel>
+            <ctl:SettingRow Label="{DynamicResource S.Editor.AutoReconnect}" Icon="refresh-ccw" IsVisible="{Binding IsSessionKind}">
+              <ComboBox ItemsSource="{Binding ReconnectModes}" SelectedIndex="{Binding ReconnectIndex}" />
+            </ctl:SettingRow>
+            <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto" IsVisible="{Binding IsFtp}">
+              <TextBlock Classes="label" Text="{DynamicResource S.Setting.ftp.encryption}" />
+              <ComboBox Grid.Column="1" ItemsSource="{Binding FtpModes}" SelectedItem="{Binding FtpMode}" HorizontalAlignment="Stretch" />
+            </Grid>
+            <StackPanel IsVisible="{Binding IsVnc}">
+              <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto">
+                <TextBlock Classes="label" Text="{DynamicResource S.Vnc.Security}" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding VncSecurities}" SelectedIndex="{Binding VncSecurityIndex}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Vnc.Quality}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding VncQualities}" SelectedIndex="{Binding VncQualityIndex}" HorizontalAlignment="Stretch" />
+              </Grid>
+              <ctl:Hint Text="{DynamicResource S.Vnc.SecurityHint}" />
+              <ctl:SettingRow Label="{DynamicResource S.Setting.vnc.viewOnly}"><ToggleSwitch IsChecked="{Binding VncViewOnly}" /></ctl:SettingRow>
+              <ctl:SettingRow Label="{DynamicResource S.Editor.VncScale}"><ToggleSwitch IsChecked="{Binding VncScale}" /></ctl:SettingRow>
+            </StackPanel>
+            <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto" IsVisible="{Binding IsCommand}">
+              <TextBlock Classes="label" Text="{DynamicResource S.Setting.cmd.line}" />
+              <TextBox Grid.Column="1" Text="{Binding CommandLine}" Classes="mono" PlaceholderText="C:\Program Files\Tool\tool.exe" />
+              <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Setting.cmd.args}" />
+              <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CommandArgs}" Classes="mono" PlaceholderText="--host $HOST$ --user $USER$" />
+              <ctl:Hint Grid.Row="2" Grid.Column="1" Text="{DynamicResource S.Editor.CommandHint}" />
+            </Grid>
+            <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" IsVisible="{Binding IsDatabase}">
+              <TextBlock Classes="label" Text="{DynamicResource S.Setting.db.engine}" />
+              <ComboBox Grid.Column="1" ItemsSource="{Binding DbEngines}" SelectedItem="{Binding DbEngine}" HorizontalAlignment="Stretch" />
+              <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Setting.db.name}" />
+              <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DbName}" Classes="mono" />
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Appearance -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="palette" Text="{DynamicResource S.Editor.Appearance}" /></TabItem.Header>
+        <ScrollViewer>
+          <Grid Classes="form" ColumnDefinitions="150,*" RowDefinitions="Auto,Auto" Margin="0,14,8,8">
+            <TextBlock Classes="label" Text="{DynamicResource S.Field.Icon}" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+              <Border Width="36" Height="36" CornerRadius="8" Background="{DynamicResource B.SurfaceRaised}">
+                <ctl:LineIcon Icon="{Binding IconPreview}" Size="18" HorizontalAlignment="Center" />
+              </Border>
+              <Button Click="PickIconClick"><ctl:IconLabel Icon="shapes" Text="{DynamicResource S.Editor.ChooseIcon}" /></Button>
+              <Button Click="ResetIconClick"><ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Editor.AutoIcon}" /></Button>
+            </StackPanel>
+            <TextBlock Grid.Row="1" Classes="label" Text="{DynamicResource S.Field.Color}" VerticalAlignment="Top" Margin="0,6,16,10" />
+            <WrapPanel Grid.Row="1" Grid.Column="1" ItemSpacing="8" LineSpacing="8">
+              <Button Classes="swatch" Classes.selected="{Binding RandomColor}" Width="28" Height="28" ToolTip.Tip="{DynamicResource S.Color.Random}" Click="RandomColorClick">
+                <Button.Background>
+                  <ConicGradientBrush>
+                    <GradientStop Color="#EF4444" Offset="0" />
+                    <GradientStop Color="#F59E0B" Offset="0.17" />
+                    <GradientStop Color="#EAB308" Offset="0.33" />
+                    <GradientStop Color="#22C55E" Offset="0.5" />
+                    <GradientStop Color="#06B6D4" Offset="0.67" />
+                    <GradientStop Color="#6366F1" Offset="0.83" />
+                    <GradientStop Color="#EF4444" Offset="1" />
+                  </ConicGradientBrush>
+                </Button.Background>
+                <ctl:LineIcon Icon="shuffle" Size="13" Foreground="White" />
+              </Button>
+              <Button Classes="swatch" Classes.selected="{Binding NoColor}" Width="28" Height="28" Background="{DynamicResource B.SurfaceRaised}"
+                      ToolTip.Tip="{DynamicResource S.Color.Inherit}" Click="NoColorClick">
+                <ctl:LineIcon Icon="circle-x" Size="14" Foreground="{DynamicResource B.TextSecondary}" />
+              </Button>
+              <ColorPicker Color="{Binding CustomColor}" IsAlphaEnabled="False" IsAlphaVisible="False" Height="28" ToolTip.Tip="{DynamicResource S.Editor.ColorCustom}" />
+              <Border Classes="vdivider" Height="20" Margin="2,0" />
+              <ItemsControl ItemsSource="{Binding Swatches}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><WrapPanel ItemSpacing="8" LineSpacing="8" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:HueSwatch">
+                    <Button Classes="swatch" Classes.selected="{Binding IsSelected}" Width="28" Height="28" Background="{Binding Brush}"
+                            ToolTip.Tip="{Binding Tip}" Click="SwatchClick" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </WrapPanel>
+          </Grid>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- Notes -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="notebook-pen" Text="{DynamicResource S.Editor.Notes}" /></TabItem.Header>
+        <TextBox Margin="0,14,8,8" Text="{Binding Notes}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="260"
+                 PlaceholderText="{DynamicResource S.Editor.NotesWatermark}" />
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="using:Nexode.App.ViewModels.Sessions"
+             xmlns:ss="using:Nexode.App.Views.Sessions"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.Sessions.RdpSessionView"
+             x:DataType="s:RdpTabViewModel">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Classes="sessionbar">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Ellipse Width="8" Height="8" Classes="statedot" Classes.on="{Binding IsConnected}" Classes.off="{Binding IsEnded}" />
+          <TextBlock Text="{Binding StatusText}" Classes="small" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2">
+          <Button Classes="icon small" Command="{Binding FullscreenCommand}" ToolTip.Tip="{DynamicResource S.Session.Fullscreen}"><ctl:LineIcon Icon="maximize" Size="17" /></Button>
+          <Button Classes="icon small" Command="{Binding ReconnectCommand}" ToolTip.Tip="{DynamicResource S.Session.Reconnect}"><ctl:LineIcon Icon="refresh-cw" Size="17" /></Button>
+          <Button Classes="icon small danger" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsConnected}" ToolTip.Tip="{DynamicResource S.Session.Disconnect}"><ctl:LineIcon Icon="unplug" Size="17" /></Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Panel Background="Black">
+      <ContentControl x:Name="HostSlot" IsVisible="{Binding !IsEnded}" />
+      <ss:SessionOverlay IsVisible="{Binding IsEnded}" />
+    </Panel>
+  </DockPanel>
+</UserControl>

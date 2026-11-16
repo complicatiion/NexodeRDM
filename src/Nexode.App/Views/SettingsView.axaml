@@ -1,0 +1,1205 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Nexode.App.ViewModels"
+             xmlns:ctl="using:Nexode.App.Controls"
+             xmlns:v="using:Nexode.App.Views"
+             x:Class="Nexode.App.Views.SettingsView"
+             x:DataType="vm:SettingsTabViewModel">
+  <UserControl.Resources>
+    <DataTemplate x:Key="OptionTemplate" DataType="vm:OptionItem">
+      <StackPanel Orientation="Horizontal" Spacing="9">
+        <ctl:FlagIcon Code="{Binding Flag}" Width="20" Height="14" IsVisible="{Binding HasFlag}" VerticalAlignment="Center" />
+        <ctl:LineIcon Icon="{Binding Icon}" Size="15" IsVisible="{Binding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+      </StackPanel>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <DockPanel Margin="36,24,36,0">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+      <TextBlock Text="{DynamicResource S.Tab.Settings}" Classes="h1" />
+      <ProgressBar Grid.Column="1" IsIndeterminate="True" Width="120" IsVisible="{Binding Busy}" VerticalAlignment="Center" />
+    </Grid>
+    <TabControl Classes="pills" SelectedIndex="{Binding PageIndex}">
+
+      <!-- ===================================================== Appearance -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="palette" Text="{DynamicResource S.Settings.Appearance}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.ThemeCard}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Theme}" Icon="sun-moon">
+                  <ComboBox ItemsSource="{Binding ThemeNames}" SelectedIndex="{Binding ThemeIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.DarkVariant}" IsVisible="{Binding HasDarkVariant}">
+                  <ComboBox ItemsSource="{Binding DarkVariants}" SelectedIndex="{Binding DarkVariantIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.LightVariant}" IsVisible="{Binding HasDarkVariant}">
+                  <ComboBox ItemsSource="{Binding LightVariants}" SelectedIndex="{Binding LightVariantIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AutoSource}" IsVisible="{Binding IsAuto}">
+                  <ComboBox ItemsSource="{Binding AutoSources}" SelectedIndex="{Binding AutoSourceIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Times}" IsVisible="{Binding IsFixedMode}">
+                  <StackPanel Orientation="Horizontal" Spacing="6" Width="220">
+                    <ctl:LineIcon Icon="sun" Size="15" />
+                    <TextBox Text="{Binding LightFrom}" Width="78" />
+                    <ctl:LineIcon Icon="moon" Size="15" Margin="8,0,0,0" />
+                    <TextBox Text="{Binding DarkFrom}" Width="78" />
+                  </StackPanel>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Location}" Info="{DynamicResource S.Settings.SunHint}" IsVisible="{Binding IsSunMode}">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBox Text="{Binding Latitude}" Width="84" PlaceholderText="{DynamicResource S.Settings.Latitude}" />
+                    <TextBox Text="{Binding Longitude}" Width="84" PlaceholderText="{DynamicResource S.Settings.Longitude}" />
+                    <Button Classes="icon" Command="{Binding UseCurrentLocationCommand}" ToolTip.Tip="{DynamicResource S.Settings.Bremen}">
+                      <ctl:LineIcon Icon="map-pin" Size="15" />
+                    </Button>
+                  </StackPanel>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Accent}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.SystemAccent}" Icon="monitor" Info="{DynamicResource S.Settings.SystemAccentInfo}">
+                  <ToggleSwitch IsChecked="{Binding UseSystemAccent}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AccentColor}" Icon="palette" IsEnabled="{Binding CustomAccent}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox Text="{Binding AccentHex}" Width="108" Classes="mono" />
+                    <ColorPicker Color="{Binding AccentColor}" IsAlphaEnabled="False" IsAlphaVisible="False" Width="104" ToolTip.Tip="{DynamicResource S.Settings.CustomColor}" />
+                  </StackPanel>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Presets}" IsEnabled="{Binding CustomAccent}">
+                  <ItemsControl ItemsSource="{Binding Accents}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="7" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:AccentSwatch">
+                        <Button Classes="swatch" Classes.selected="{Binding IsSelected}" Width="24" Height="24" Background="{Binding Brush}"
+                                ToolTip.Tip="{Binding Name}"
+                                Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).PickAccentCommand}" CommandParameter="{Binding}">
+                          <ctl:LineIcon Icon="check" Size="12" Foreground="White" IsVisible="{Binding IsSelected}" />
+                        </Button>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Settings.AccentHint}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Interface}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Language}" Icon="languages">
+                  <ComboBox ItemsSource="{Binding Languages}" SelectedIndex="{Binding LanguageIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Compact}" Icon="list">
+                  <ToggleSwitch IsChecked="{Binding Compact}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ShowHints}" Icon="info" Info="{DynamicResource S.Settings.ShowHintsInfo}">
+                  <ToggleSwitch IsChecked="{Binding ShowHints}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ShowHost}" Icon="server">
+                  <ToggleSwitch IsChecked="{Binding ShowHostInTree}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AutoFolderColors}" Icon="folder" Info="{DynamicResource S.Settings.AutoFolderColorsInfo}">
+                  <ToggleSwitch IsChecked="{Binding AutoFolderColors}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Greetings}" Icon="sparkles" Info="{DynamicResource S.Settings.GreetingsInfo}">
+                  <ToggleSwitch IsChecked="{Binding Greetings}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.StatusBar}" Icon="panel-left" Info="{DynamicResource S.Settings.StatusBarInfo}">
+                  <ToggleSwitch IsChecked="{Binding ShowStatusBar}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ResetHints}" Icon="list-restart" Info="{DynamicResource S.Settings.ResetHintsInfo}">
+                  <Button Classes="w220" Command="{Binding ResetHintsCommand}">
+                    <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Settings.ResetHintsButton}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.RailColors}" Icon="pin" Info="{DynamicResource S.Settings.RailColorsInfo}">
+                  <ToggleSwitch IsChecked="{Binding RailColors}" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Display}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Scale}" Icon="scaling" Info="{DynamicResource S.Settings.ScaleInfo}">
+                  <ComboBox ItemsSource="{Binding ScaleOptions}" SelectedIndex="{Binding ScaleIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ScaleCustom}" Icon="sliders-horizontal" IsVisible="{Binding IsCustomScale}">
+                  <StackPanel Orientation="Horizontal" Spacing="10" Width="220">
+                    <Slider Minimum="75" Maximum="200" TickFrequency="5" IsSnapToTickEnabled="True" Value="{Binding CustomScale}" Width="160" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding CustomScaleText}" Classes="mono" VerticalAlignment="Center" />
+                  </StackPanel>
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Settings.ScaleHint}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Animations}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AnimationsOn}" Icon="sparkle" Info="{DynamicResource S.Settings.AnimationsInfo}">
+                  <ToggleSwitch IsChecked="{Binding Animations}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.TreeAnimation}" Icon="folder-tree" Info="{DynamicResource S.Settings.TreeAnimationInfo}" IsEnabled="{Binding Animations}">
+                  <ToggleSwitch IsChecked="{Binding TreeAnimation}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AnimationSpeed}" Icon="gauge" IsEnabled="{Binding Animations}">
+                  <StackPanel Orientation="Horizontal" Spacing="10" Width="220">
+                    <Slider Minimum="0" Maximum="7" TickFrequency="1" IsSnapToTickEnabled="True" TickPlacement="BottomRight" Value="{Binding AnimationSpeedStep}" Width="160" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding AnimationSpeedText}" Classes="mono" VerticalAlignment="Center" />
+                  </StackPanel>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AnimationPreset}" Icon="wand-sparkles">
+                  <StackPanel Orientation="Horizontal" Spacing="4">
+                    <ToggleButton Classes="seg" IsChecked="{Binding PresetPerformance, Mode=OneWay}" Command="{Binding AnimationPresetCommand}" CommandParameter="performance">
+                      <ctl:IconLabel Icon="zap" Text="{DynamicResource S.Anim.Performance}" />
+                    </ToggleButton>
+                    <ToggleButton Classes="seg" IsChecked="{Binding PresetFast, Mode=OneWay}" Command="{Binding AnimationPresetCommand}" CommandParameter="fast">
+                      <ctl:IconLabel Icon="rocket" Text="{DynamicResource S.Anim.Fast}" />
+                    </ToggleButton>
+                    <ToggleButton Classes="seg" IsChecked="{Binding PresetBalanced, Mode=OneWay}" Command="{Binding AnimationPresetCommand}" CommandParameter="balanced">
+                      <ctl:IconLabel Icon="gauge" Text="{DynamicResource S.Anim.Balanced}" />
+                    </ToggleButton>
+                    <ToggleButton Classes="seg" IsChecked="{Binding PresetSmooth, Mode=OneWay}" Command="{Binding AnimationPresetCommand}" CommandParameter="smooth">
+                      <ctl:IconLabel Icon="sparkles" Text="{DynamicResource S.Anim.Smooth}" />
+                    </ToggleButton>
+                  </StackPanel>
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Settings.AnimationsHint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Behavior -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="mouse-pointer-click" Text="{DynamicResource S.Settings.Behavior}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.TreeAndTabs}" />
+                <ctl:SettingRow Label="{DynamicResource S.Sort.FoldersFirst}" Icon="folder-tree">
+                  <ToggleSwitch IsChecked="{Binding FoldersFirst}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.OpenBehavior}" Icon="app-window">
+                  <ComboBox ItemsSource="{Binding OpenBehaviors}" SelectedIndex="{Binding OpenBehaviorIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.RootSort}" Icon="arrow-up-down">
+                  <ComboBox ItemsSource="{Binding SortModes}" SelectedIndex="{Binding RootSortIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Sessions}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ConfirmConnect}" Icon="plug-zap" Info="{DynamicResource S.Settings.ConfirmConnectInfo}">
+                  <ToggleSwitch IsChecked="{Binding ConfirmProduction}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AutoReconnect}" Icon="refresh-ccw" Info="{DynamicResource S.Settings.AutoReconnectInfo}">
+                  <ToggleSwitch IsChecked="{Binding AutoReconnect}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ReconnectAttempts}" Icon="repeat" IsEnabled="{Binding AutoReconnect}">
+                  <NumericUpDown Value="{Binding ReconnectAttempts}" Minimum="1" Maximum="20" Increment="1" FormatString="0" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Terminal}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.TerminalCopyOnSelect}" Icon="text-select">
+                  <ToggleSwitch IsChecked="{Binding TerminalCopyOnSelect}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.TerminalFontSize}" Icon="type">
+                  <NumericUpDown Value="{Binding TerminalFontSize}" Minimum="8" Maximum="32" Increment="1" FormatString="0" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.TerminalScrollback}" Icon="scroll-text">
+                  <NumericUpDown Value="{Binding TerminalScrollback}" Minimum="0" Maximum="100000" Increment="1000" FormatString="0" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Web.Title}" />
+                  <Border Grid.Column="1" Classes="pill headpill" Classes.success="{Binding WebEngineOk}" Classes.warning="{Binding !WebEngineOk}" ToolTip.Tip="{Binding WebEngineText}">
+                    <TextBlock Text="{Binding WebEngineText}" MaxWidth="320" TextTrimming="CharacterEllipsis" />
+                  </Border>
+                </Grid>
+                <ctl:SettingRow Label="{DynamicResource S.Web.OpenExternalSetting}" Icon="external-link" Info="{DynamicResource S.Web.OpenExternalInfo}">
+                  <ToggleSwitch IsChecked="{Binding OpenWebExternal}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Web.ClearData}" Icon="eraser" Info="{DynamicResource S.Web.ClearDataInfo}">
+                  <Button Classes="w220" Command="{Binding ClearWebDataCommand}">
+                    <ctl:IconLabel Icon="eraser" Text="{DynamicResource S.Web.ClearDataButton}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Web.Hint}" />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Shortcuts}" />
+                <ItemsControl ItemsSource="{Binding Shortcuts}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:ShortcutItem">
+                      <Grid ColumnDefinitions="*,Auto" MinHeight="29" Classes="shortcut">
+                        <TextBlock Text="{Binding Action}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <Border Grid.Column="1" Classes="keypill" Width="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).ShortcutPillWidth}">
+                          <TextBlock Text="{Binding Combo}" />
+                        </Border>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Startup -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="rocket" Text="{DynamicResource S.Settings.Startup}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Startup}" />
+                <ctl:SettingRow Label="{DynamicResource S.Start.Autostart}" Icon="power" Info="{DynamicResource S.Start.AutostartInfo}" IsVisible="{Binding CanAutostart}">
+                  <ToggleSwitch IsChecked="{Binding Autostart}" />
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Portable.NoSystemChanges}" IsVisible="{Binding IsPortable}" Always="True" />
+                <ctl:SettingRow Label="{DynamicResource S.Start.Page}" Icon="house" Info="{DynamicResource S.Start.PageInfo}">
+                  <ComboBox ItemsSource="{Binding StartPages}" SelectedIndex="{Binding StartPageIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Start.Monitor}" Icon="monitor-up">
+                  <ComboBox ItemsSource="{Binding Monitors}" SelectedIndex="{Binding StartMonitorIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Dash.OnStartup}" Icon="layout-dashboard">
+                  <ToggleSwitch IsChecked="{Binding DashboardOnStartup}" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Tray.Title}" />
+                <ctl:SettingRow Label="{DynamicResource S.Tray.Icon}" Icon="pin" Info="{DynamicResource S.Tray.IconInfo}">
+                  <ToggleSwitch IsChecked="{Binding TrayIcon}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Tray.CloseToTray}" Icon="minimize" IsEnabled="{Binding TrayIcon}">
+                  <ToggleSwitch IsChecked="{Binding CloseToTray}" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Update.Title}" />
+                <ctl:SettingRow Label="{DynamicResource S.Update.Auto}" Icon="cloud-download" Info="{DynamicResource S.Update.AutoInfo}">
+                  <ToggleSwitch IsChecked="{Binding UpdateCheck}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Update.Now}" Icon="refresh-cw">
+                  <StackPanel Spacing="6" Width="220">
+                    <Button Classes="w220" Command="{Binding CheckUpdatesNowCommand}">
+                      <ctl:IconLabel Icon="refresh-cw" Text="{DynamicResource S.Update.CheckButton}" />
+                    </Button>
+                    <Button Classes="w220 primary" Command="{Binding OpenReleaseCommand}" IsVisible="{Binding UpdateAvailable}">
+                      <ctl:IconLabel Icon="external-link" Text="{DynamicResource S.Update.Open}" />
+                    </Button>
+                  </StackPanel>
+                </ctl:SettingRow>
+                <Border Classes="notice" IsVisible="{Binding HasUpdateText}" Margin="0,4,0,0">
+                  <TextBlock Text="{Binding UpdateText}" TextWrapping="Wrap" />
+                </Border>
+                <ctl:Hint Text="{DynamicResource S.Update.Hint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Home page -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="house" Text="{DynamicResource S.Settings.Home}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Home.Sections}" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="ghost small" Command="{Binding HomeResetCommand}">
+                    <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Home.Reset}" />
+                  </Button>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding HomeItems}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:LayoutItem">
+                      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" MinHeight="40">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="2,0,12,0" Foreground="{DynamicResource B.AccentText}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="icon small" ToolTip.Tip="{DynamicResource S.Env.MoveUp}"
+                                Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).HomeUpCommand}" CommandParameter="{Binding}">
+                          <ctl:LineIcon Icon="chevron-up" Size="14" />
+                        </Button>
+                        <Button Grid.Column="3" Classes="icon small" ToolTip.Tip="{DynamicResource S.Profile.Down}"
+                                Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).HomeDownCommand}" CommandParameter="{Binding}">
+                          <ctl:LineIcon Icon="chevron-down" Size="14" />
+                        </Button>
+                        <ToggleSwitch Grid.Column="4" IsChecked="{Binding IsShown}" OnContent="" OffContent="" MinWidth="0" Margin="10,0,-10,0" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ctl:Hint Text="{DynamicResource S.Home.Hint}" />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Home.Greeting}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.Greetings}" Icon="hand">
+                  <ToggleSwitch IsChecked="{Binding Greetings}" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Features -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="toggle-right" Text="{DynamicResource S.Settings.Features}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Features}" VerticalAlignment="Center" />
+                  <Border Grid.Column="1" Classes="pill headpill accent"><TextBlock Text="{Binding FeaturesSummary}" /></Border>
+                </Grid>
+                <TextBlock Text="{DynamicResource S.Feature.Intro}" TextWrapping="Wrap" />
+                <Border Classes="notice">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <ctl:LineIcon Icon="users-round" Size="17" Margin="0,0,10,0" VerticalAlignment="Top" Foreground="{DynamicResource B.AccentText}" />
+                    <TextBlock Grid.Column="1" Text="{DynamicResource S.Feature.TeamNote}" TextWrapping="Wrap" />
+                  </Grid>
+                </Border>
+                <WrapPanel ItemSpacing="8" LineSpacing="8" HorizontalAlignment="Right">
+                  <Button Classes="w220" Command="{Binding FeaturesDefaultsCommand}">
+                    <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Feature.Defaults}" />
+                  </Button>
+                  <Button Classes="w220" Command="{Binding FeaturesMinimalCommand}">
+                    <ctl:IconLabel Icon="toggle-left" Text="{DynamicResource S.Feature.Minimal}" />
+                  </Button>
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+            <ItemsControl ItemsSource="{Binding FeatureGroups}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><StackPanel Spacing="16" /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:FeatureGroup">
+                  <Border Classes="card">
+                    <StackPanel>
+                      <TextBlock Classes="cardtitle" Text="{Binding Title}" />
+                      <ItemsControl ItemsSource="{Binding Items}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate DataType="vm:FeatureItem">
+                            <StackPanel>
+                              <ctl:SettingRow Label="{Binding Title}" Icon="{Binding Icon}" Info="{Binding Info}">
+                                <ToggleSwitch IsChecked="{Binding IsOn}" />
+                              </ctl:SettingRow>
+                              <ctl:Hint Text="{Binding BlockedText}" IsVisible="{Binding IsBlocked}" Always="True" />
+                            </StackPanel>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Dashboard -->
+      <TabItem IsVisible="{Binding ShowDashboardPage}">
+        <TabItem.Header><ctl:IconLabel Icon="layout-dashboard" Text="{DynamicResource S.Tab.Dashboard}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Dash.Cards}" />
+                <ItemsControl ItemsSource="{Binding DashboardItems}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:LayoutItem">
+                      <Grid ColumnDefinitions="Auto,*,Auto" MinHeight="40" Margin="0,0,24,0">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="2,0,12,0" Foreground="{DynamicResource B.AccentText}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <ToggleSwitch Grid.Column="2" IsChecked="{Binding IsShown}" OnContent="" OffContent="" MinWidth="0" Margin="10,0,-10,0" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ctl:SettingRow Label="{DynamicResource S.Dash.ListCount}" Icon="list-ordered">
+                  <NumericUpDown Value="{Binding DashboardListCount}" Minimum="3" Maximum="30" Increment="1" FormatString="0" />
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Dash.Window}" />
+                <ctl:SettingRow Label="{DynamicResource S.Dash.Monitor}" Icon="monitor-up">
+                  <ComboBox ItemsSource="{Binding DashboardMonitors}" SelectedIndex="{Binding DashboardMonitorIndex}" ItemTemplate="{StaticResource OptionTemplate}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Dash.Fullscreen}" Icon="maximize" Info="{DynamicResource S.Dash.FullscreenInfo}">
+                  <ToggleSwitch IsChecked="{Binding DashboardFullscreen}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Dash.OnStartup}" Icon="rocket">
+                  <ToggleSwitch IsChecked="{Binding DashboardOnStartup}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Dash.OpenWindow}" Icon="app-window">
+                  <Button Classes="w220" Command="{Binding OpenDashboardWindowCommand}">
+                    <ctl:IconLabel Icon="app-window" Text="{DynamicResource S.Dash.OpenNow}" />
+                  </Button>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Status.Title}" />
+                <ctl:SettingRow Label="{DynamicResource S.Status.Enable}" Icon="activity" Info="{DynamicResource S.Status.EnableInfo}">
+                  <ToggleSwitch IsChecked="{Binding LiveStatusOn}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Status.Interval}" Icon="timer" IsEnabled="{Binding LiveStatusOn}">
+                  <NumericUpDown Value="{Binding LiveStatusSeconds}" Minimum="15" Maximum="3600" Increment="15" FormatString="0" />
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Status.Hint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Security -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="shield" Text="{DynamicResource S.Settings.Security}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Vault}" />
+                  <Border Grid.Column="1" Classes="pill headpill" Classes.success="{Binding !IsLocked}" Classes.warning="{Binding IsLocked}">
+                    <TextBlock Text="{Binding VaultStateText}" />
+                  </Border>
+                </Grid>
+                <Grid ColumnDefinitions="Auto,*" Margin="0,4,0,6">
+                  <ctl:LineIcon Icon="shield-check" Size="20" Margin="0,0,12,0" Foreground="{DynamicResource B.AccentText}" VerticalAlignment="Top" />
+                  <TextBlock Grid.Column="1" Text="{Binding VaultStatus}" TextWrapping="Wrap" />
+                </Grid>
+                <Border Classes="notice warning" IsVisible="{Binding VaultWeak}">
+                  <TextBlock Text="{DynamicResource S.Vault.WeakText}" TextWrapping="Wrap" />
+                </Border>
+                <Border Classes="notice" IsVisible="{Binding IsPortable}">
+                  <TextBlock Text="{DynamicResource S.Vault.PortableNote}" TextWrapping="Wrap" />
+                </Border>
+                <ctl:SettingRow Label="{DynamicResource S.Security.Encryption}" Icon="file-key" Info="{DynamicResource S.Security.EncryptionInfo}">
+                  <ComboBox ItemsSource="{Binding EncryptionModes}" SelectedIndex="{Binding EncryptionIndex}" ItemTemplate="{StaticResource OptionTemplate}"
+                            IsEnabled="{Binding CanChooseEncryption}" />
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Security.EncNeedsPassword}" IsVisible="{Binding NoPassword}" Always="True" />
+                <ctl:SettingRow Label="{DynamicResource S.Security.ExportWithMaster}" Icon="file-up" Info="{DynamicResource S.Security.ExportWithMasterInfo}" IsEnabled="{Binding HasPassword}">
+                  <ToggleSwitch IsChecked="{Binding ExportWithMaster}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Vault.MasterPassword}" Icon="key-round">
+                  <Panel>
+                    <Button Classes="w220" Command="{Binding SetPasswordCommand}" IsVisible="{Binding HasPassword}">
+                      <ctl:IconLabel Icon="key-round" Text="{DynamicResource S.Vault.ChangePassword}" />
+                    </Button>
+                    <Button Classes="w220 primary" Command="{Binding SetPasswordCommand}" IsVisible="{Binding NoPassword}">
+                      <ctl:IconLabel Icon="lock" Text="{DynamicResource S.Vault.SetPassword}" />
+                    </Button>
+                  </Panel>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Vault.LockNow}" Icon="lock" IsVisible="{Binding HasPassword}">
+                  <Button Classes="w220" Command="{Binding LockNowCommand}">
+                    <ctl:IconLabel Icon="lock" Text="{DynamicResource S.Vault.Lock}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Vault.RemoveLabel}" Icon="lock-open" IsVisible="{Binding CanRemovePassword}">
+                  <Button Classes="w220" Command="{Binding RemovePasswordCommand}">
+                    <ctl:IconLabel Icon="lock-open" Text="{DynamicResource S.Vault.RemovePassword}" />
+                  </Button>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Security.Locking}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.AutoLock}" Icon="timer" Info="{DynamicResource S.Settings.AutoLockInfo}">
+                  <NumericUpDown Value="{Binding AutoLockMinutes}" Minimum="0" Maximum="480" Increment="5" FormatString="0" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Security.LockOnMinimize}" Icon="minimize">
+                  <ToggleSwitch IsChecked="{Binding LockOnMinimize}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Security.LockOnSessionLock}" Icon="monitor-off" IsVisible="{Binding IsWindows}">
+                  <ToggleSwitch IsChecked="{Binding LockOnSessionLock}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Security.LockOnSleep}" Icon="moon">
+                  <ToggleSwitch IsChecked="{Binding LockOnSleep}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Security.Reauth}" Icon="eye" Info="{DynamicResource S.Security.ReauthInfo}">
+                  <ToggleSwitch IsChecked="{Binding ReauthToReveal}" />
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Security.LockingHint}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Security.Clipboard}" />
+                <ctl:SettingRow Label="{DynamicResource S.Settings.ClipboardClear}" Icon="clipboard">
+                  <NumericUpDown Value="{Binding ClipboardSeconds}" Minimum="0" Maximum="600" Increment="5" FormatString="0" />
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Settings.SecurityHint}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding KeyToolsEnabled}">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Keys.Title}" />
+                <ctl:SettingRow Label="{DynamicResource S.Keys.Generate}" Icon="key-round" Info="{DynamicResource S.Keys.SettingInfo}">
+                  <Button Classes="w220" Command="{Binding OpenKeyToolsCommand}">
+                    <ctl:IconLabel Icon="key-round" Text="{DynamicResource S.Keys.Open}" />
+                  </Button>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Security.KnownHosts}" VerticalAlignment="Center" />
+                  <Border Grid.Column="1" Classes="pill headpill" IsVisible="{Binding HasKnownHosts}"><TextBlock Text="{Binding KnownHostSummary}" /></Border>
+                </Grid>
+                <TextBlock Text="{DynamicResource S.Security.NoKnownHosts}" Classes="muted" IsVisible="{Binding !HasKnownHosts}" />
+                <TextBox Text="{Binding KnownHostFilter}" Classes="search" PlaceholderText="{DynamicResource S.Hosts.Filter}" IsVisible="{Binding HasKnownHosts}" />
+                <ItemsControl ItemsSource="{Binding VisibleKnownHosts}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:KnownHostItem">
+                      <Grid ColumnDefinitions="Auto,200,*,Auto,Auto,Auto" Margin="0,3">
+                        <Border Classes="pill" Width="48" Margin="0,0,10,0"><TextBlock Text="{Binding Kind}" HorizontalAlignment="Center" /></Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Target}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Details}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Fingerprint}" Classes="mono small muted" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Fingerprint}" Margin="0,0,8,0" />
+                        <Border Grid.Column="3" Classes="pill" Classes.warning="{Binding IsUnused}" Margin="0,0,6,0" VerticalAlignment="Center"><TextBlock Text="{Binding UsedText}" /></Border>
+                        <Button Grid.Column="4" Classes="icon small" ToolTip.Tip="{DynamicResource S.Hosts.CopyFingerprint}"
+                                Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).CopyFingerprintCommand}" CommandParameter="{Binding}">
+                          <ctl:LineIcon Icon="copy" Size="14" />
+                        </Button>
+                        <Button Grid.Column="5" Classes="icon small danger" ToolTip.Tip="{DynamicResource S.Security.ForgetHost}"
+                                Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).ForgetHostCommand}" CommandParameter="{Binding}">
+                          <ctl:LineIcon Icon="trash-2" Size="14" />
+                        </Button>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <WrapPanel ItemSpacing="8" LineSpacing="8" HorizontalAlignment="Right" IsVisible="{Binding HasKnownHosts}" Margin="0,6,0,0">
+                  <Button Classes="w220" Command="{Binding ForgetUnusedHostsCommand}" IsEnabled="{Binding HasUnusedHosts}">
+                    <ctl:IconLabel Icon="eraser" Text="{DynamicResource S.Hosts.ForgetUnused}" />
+                  </Button>
+                  <Button Classes="w220 danger" Command="{Binding ForgetAllHostsCommand}">
+                    <ctl:IconLabel Icon="trash-2" Text="{DynamicResource S.Hosts.ForgetAll}" />
+                  </Button>
+                </WrapPanel>
+                <ctl:Hint Text="{DynamicResource S.Hosts.Hint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Data -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="database" Text="{DynamicResource S.Settings.Data}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <!-- Active data source overview -->
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Source.Overview}" />
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                  <Border Grid.RowSpan="2" Width="44" Height="44" CornerRadius="10" Background="{DynamicResource B.AccentSoft}" Margin="0,0,14,0">
+                    <ctl:LineIcon Icon="database" Size="22" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="{Binding ActiveName}" Classes="h2" />
+                  <ctl:PathPill Grid.Column="1" Grid.Row="1" Text="{Binding ActivePath}" Margin="0,6,0,0" />
+                </Grid>
+                <UniformGrid Columns="5" Margin="0,4,0,0">
+                  <StackPanel Spacing="2"><TextBlock Text="{DynamicResource S.Source.Entries}" Classes="label" /><TextBlock Text="{Binding ActiveEntries}" Classes="h3" /></StackPanel>
+                  <StackPanel Spacing="2"><TextBlock Text="{DynamicResource S.Source.Size}" Classes="label" /><TextBlock Text="{Binding ActiveSize}" Classes="h3" /></StackPanel>
+                  <StackPanel Spacing="2"><TextBlock Text="{DynamicResource S.Source.LastBackup}" Classes="label" /><TextBlock Text="{Binding ActiveBackup}" Classes="h3" /></StackPanel>
+                  <StackPanel Spacing="2"><TextBlock Text="{DynamicResource S.Source.Vault}" Classes="label" /><TextBlock Text="{Binding ActiveVault}" Classes="h3" /></StackPanel>
+                  <StackPanel Spacing="2"><TextBlock Text="{DynamicResource S.Security.Encryption}" Classes="label" /><TextBlock Text="{Binding ActiveEncryption}" Classes="h3" /></StackPanel>
+                </UniformGrid>
+                <ctl:InfoCard Classes="warning" Icon="triangle-alert" FollowHints="False" Dismissible="False" Text="{DynamicResource S.Source.NetworkWarning}"
+                              Wanted="{Binding IsNetworkStore}" IsVisible="{Binding IsNetworkStore}" />
+                <ctl:InfoCard Icon="users-round" FollowHints="False" Dismissible="False" Text="{DynamicResource S.Shared.SourceInfo}"
+                              Wanted="{Binding IsSharedSource}" IsVisible="{Binding IsSharedSource}" />
+              </StackPanel>
+            </Border>
+
+            <!-- All data sources -->
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Sources}" VerticalAlignment="Center" />
+                  <Border Grid.Column="1" Classes="pill headpill accent">
+                    <TextBlock><Run Text="{DynamicResource S.Source.Active}" /><Run Text=" · " /><Run Text="{Binding ActiveName}" /></TextBlock>
+                  </Border>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Sources}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:SourceItem">
+                      <Grid ColumnDefinitions="Auto,170,*,Auto" Height="40">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="17" Margin="2,0,12,0" Foreground="{DynamicResource B.AccentText}" Tint="{Binding IconBrush}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="0,0,10,0">
+                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="120" />
+                          <ctl:LineIcon Icon="users-round" Size="13" IsVisible="{Binding IsShared}" ToolTip.Tip="{DynamicResource S.Shared.Badge}" Foreground="{DynamicResource B.AccentText}" />
+                          <ctl:LineIcon Icon="flask-conical" Size="13" IsVisible="{Binding IsSample}" ToolTip.Tip="{DynamicResource S.Sample.Badge}" Foreground="{DynamicResource B.AccentText}" />
+                          <ctl:LineIcon Icon="circle-check" Size="13" IsVisible="{Binding IsActive}" ToolTip.Tip="{DynamicResource S.Source.Active}" Foreground="{DynamicResource B.AccentText}" />
+                          <ctl:LineIcon Icon="circle-alert" Size="13" IsVisible="{Binding !Exists}" ToolTip.Tip="{DynamicResource S.Source.Missing}" Foreground="{DynamicResource B.DangerText}" />
+                        </StackPanel>
+                        <ctl:PathPill Grid.Column="2" Text="{Binding Path}" Margin="0,0,8,0" />
+                        <Panel Grid.Column="3" Width="104">
+                          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                          <Button Classes="icon" IsVisible="{Binding !IsActive}" ToolTip.Tip="{DynamicResource S.Source.Switch}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).SwitchSourceCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="log-in" Size="16" />
+                          </Button>
+                          <Button Classes="icon danger" IsVisible="{Binding !IsActive}" ToolTip.Tip="{DynamicResource S.Source.Remove}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).RemoveSourceCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="trash-2" Size="16" />
+                          </Button>
+                          <Button Classes="icon" ToolTip.Tip="{DynamicResource S.Source.Edit}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).EditSourceCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="pencil" Size="16" />
+                          </Button>
+                        </StackPanel>
+                        </Panel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <WrapPanel ItemSpacing="8" LineSpacing="8" HorizontalAlignment="Right" Margin="0,6,0,0">
+                  <Button Classes="w220" Command="{Binding OpenSourceFileCommand}">
+                    <ctl:IconLabel Icon="folder-open" Text="{DynamicResource S.Source.Open}" />
+                  </Button>
+                  <Button Classes="w220" Command="{Binding NewSharedSourceCommand}" ToolTip.Tip="{DynamicResource S.Shared.NewTip}" IsVisible="{Binding TeamEnabled}">
+                    <ctl:IconLabel Icon="users-round" Text="{DynamicResource S.Shared.New}" />
+                  </Button>
+                  <Button Classes="w220 primary" Command="{Binding NewSourceCommand}">
+                    <ctl:IconLabel Icon="plus" Text="{DynamicResource S.Source.New}" />
+                  </Button>
+                </WrapPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Backups -->
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Backup.Title}" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="w220" Command="{Binding OpenBackupsCommand}">
+                      <ctl:IconLabel Icon="folder-open" Text="{DynamicResource S.Settings.OpenBackups}" />
+                    </Button>
+                    <Button Classes="w220 primary" Command="{Binding BackupNowCommand}">
+                      <ctl:IconLabel Icon="archive" Text="{DynamicResource S.Menu.BackupNow}" />
+                    </Button>
+                  </StackPanel>
+                </Grid>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.BackupKeep}" Icon="history">
+                  <NumericUpDown Value="{Binding BackupKeep}" Minimum="0" Maximum="100" FormatString="0" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Settings.TrashDays}" Icon="trash-2">
+                  <NumericUpDown Value="{Binding TrashDays}" Minimum="0" Maximum="3650" FormatString="0" />
+                </ctl:SettingRow>
+                <TextBlock Text="{DynamicResource S.Backup.None}" Classes="muted" IsVisible="{Binding !HasBackups}" />
+                <ItemsControl ItemsSource="{Binding Backups}" Margin="0,4,0,0">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:BackupItem">
+                      <Grid ColumnDefinitions="Auto,*,90,Auto" Height="36">
+                        <ctl:LineIcon Icon="archive" Size="15" Margin="2,0,12,0" Foreground="{DynamicResource B.TextSecondary}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding When}" />
+                          <TextBlock Text="{Binding Name}" Classes="mono small muted" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Size}" Classes="muted small" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" />
+                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                          <Button Classes="icon" ToolTip.Tip="{DynamicResource S.Backup.Restore}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).RestoreBackupCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="rotate-ccw" Size="15" />
+                          </Button>
+                          <Button Classes="icon danger" ToolTip.Tip="{DynamicResource S.Backup.Delete}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).DeleteBackupCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="trash-2" Size="15" />
+                          </Button>
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+
+            <!-- Import / export -->
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Transfer}" />
+                <WrapPanel ItemSpacing="8" LineSpacing="8" HorizontalAlignment="Right">
+                  <DropDownButton Classes="w220">
+                    <DropDownButton.Content><ctl:IconLabel Icon="file-up" Text="{DynamicResource S.Tip.Export}" /></DropDownButton.Content>
+                    <DropDownButton.Flyout>
+                      <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuItem Header="{DynamicResource S.Settings.ExportConnections}" Command="{Binding ExportConnectionsCommand}"><MenuItem.Icon><ctl:LineIcon Icon="file-up" /></MenuItem.Icon></MenuItem>
+                        <MenuItem Header="{DynamicResource S.Settings.ExportSettings}" Command="{Binding ExportSettingsCommand}"><MenuItem.Icon><ctl:LineIcon Icon="settings" /></MenuItem.Icon></MenuItem>
+                        <MenuItem Header="{DynamicResource S.Settings.ExportTheme}" Command="{Binding ExportThemeCommand}"><MenuItem.Icon><ctl:LineIcon Icon="palette" /></MenuItem.Icon></MenuItem>
+                      </MenuFlyout>
+                    </DropDownButton.Flyout>
+                  </DropDownButton>
+                  <Button Classes="w220" Command="{Binding ImportForeignCommand}"><ctl:IconLabel Icon="arrow-right-left" Text="{DynamicResource S.Import.Foreign}" /></Button>
+                  <Button Classes="w220 primary" Command="{Binding ImportFileCommand}"><ctl:IconLabel Icon="file-down" Text="{DynamicResource S.Menu.Import}" /></Button>
+                </WrapPanel>
+                <ctl:Hint Text="{DynamicResource S.Settings.TransferHint}" />
+              </StackPanel>
+            </Border>
+
+            <!-- Connection history -->
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Tab.History}" />
+                <ctl:SettingRow Label="{DynamicResource S.History.Enable}" Icon="history" Info="{DynamicResource S.History.EnableInfo}">
+                  <ToggleSwitch IsChecked="{Binding ConnectionHistory}" />
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.History.Show}" Icon="scroll-text">
+                  <Button Classes="w220" Command="{Binding ShowHistoryCommand}">
+                    <ctl:IconLabel Icon="history" Text="{DynamicResource S.History.ShowButton}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.History.Clear}" Icon="trash-2">
+                  <Button Classes="w220 danger" Command="{Binding ClearHistoryCommand}">
+                    <ctl:IconLabel Icon="trash-2" Text="{DynamicResource S.History.ClearButton}" />
+                  </Button>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+
+            <!-- Reset -->
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Reset.Card}" />
+                <ctl:SettingRow Label="{DynamicResource S.Reset.Title}" Icon="rotate-ccw" Info="{DynamicResource S.Reset.Info}">
+                  <Button Classes="w220 danger" Command="{Binding ResetAppCommand}">
+                    <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Reset.Button}" />
+                  </Button>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Categories -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="tags" Text="{DynamicResource S.Settings.Categories}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Categories}" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding RestoreCategoriesCommand}">
+                      <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Category.RestoreDefaults}" />
+                    </Button>
+                    <Button Classes="primary" Command="{Binding AddCategoryCommand}">
+                      <ctl:IconLabel Icon="plus" Text="{DynamicResource S.Category.Add}" />
+                    </Button>
+                  </StackPanel>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Categories}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:CategoryItem">
+                      <Border Classes="tile" Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                          <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource B.AccentSoft}" Margin="0,0,12,0">
+                            <ctl:LineIcon Icon="{Binding Icon}" Size="16" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                          </Border>
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding UsageText}" Classes="muted small" />
+                          </StackPanel>
+                          <Button Grid.Column="2" Classes="icon" ToolTip.Tip="{DynamicResource S.Category.Edit}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).EditCategoryCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="pencil" Size="15" />
+                          </Button>
+                          <Button Grid.Column="3" Classes="icon danger" ToolTip.Tip="{DynamicResource S.Category.Delete}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).DeleteCategoryCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="trash-2" Size="15" />
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ctl:Hint Text="{DynamicResource S.Settings.CategoriesHint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Environments -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="flag" Text="{DynamicResource S.Settings.Environments}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Settings.Environments}" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding RestoreEnvironmentsCommand}">
+                      <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Category.RestoreDefaults}" />
+                    </Button>
+                    <Button Classes="primary" Command="{Binding AddEnvironmentCommand}">
+                      <ctl:IconLabel Icon="plus" Text="{DynamicResource S.Env.Add}" />
+                    </Button>
+                  </StackPanel>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding EnvironmentItems}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:EnvItem">
+                      <Border Classes="tile" Margin="0,0,8,8">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                          <Border Width="32" Height="32" CornerRadius="8" Background="{Binding Background}" Margin="0,0,12,0">
+                            <ctl:LineIcon Icon="flag" Size="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Brush}" />
+                          </Border>
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <!-- Badge in a fixed column: same position for every environment, long names are cut -->
+                            <Grid ColumnDefinitions="110,Auto">
+                              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}" />
+                              <Border Grid.Column="1" Classes="pill" Background="{Binding Background}" Padding="5,0" MinWidth="44" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Short}" FontSize="9.5" FontWeight="SemiBold" Foreground="{Binding Brush}" HorizontalAlignment="Center" />
+                              </Border>
+                            </Grid>
+                            <TextBlock Text="{Binding UsageText}" Classes="muted small" />
+                          </StackPanel>
+                          <Button Grid.Column="2" Classes="icon" ToolTip.Tip="{DynamicResource S.Env.MoveUp}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).MoveEnvironmentCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="arrow-up" Size="15" />
+                          </Button>
+                          <Button Grid.Column="3" Classes="icon" ToolTip.Tip="{DynamicResource S.Env.Edit}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).EditEnvironmentCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="pencil" Size="15" />
+                          </Button>
+                          <Button Grid.Column="4" Classes="icon danger" ToolTip.Tip="{DynamicResource S.Env.Delete}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).DeleteEnvironmentCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="trash-2" Size="15" />
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ctl:Hint Text="{DynamicResource S.Settings.EnvironmentsHint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Profiles -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="layers" Text="{DynamicResource S.Rail.Profiles}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Profile.Title}" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="primary" Command="{Binding NewProfileCommand}">
+                    <ctl:IconLabel Icon="plus" Text="{DynamicResource S.Profile.New}" />
+                  </Button>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding ProfileList}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:ProfileItem">
+                      <Border Classes="tile">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                          <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource B.AccentSoft}" Margin="0,0,12,0">
+                            <ctl:LineIcon Icon="{Binding Icon}" Size="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource B.AccentText}" Tint="{Binding IconBrush}" />
+                          </Border>
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Summary}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                          <Button Grid.Column="2" Classes="icon accenticon" ToolTip.Tip="{DynamicResource S.Profile.Open}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).StartProfileCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="circle-play" Size="17" />
+                          </Button>
+                          <Button Grid.Column="3" Classes="icon" ToolTip.Tip="{DynamicResource S.Profile.Edit}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).EditProfileCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="pencil" Size="15" />
+                          </Button>
+                          <Button Grid.Column="4" Classes="icon danger" ToolTip.Tip="{DynamicResource S.Profile.Delete}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).DeleteProfileCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="trash-2" Size="15" />
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ctl:Hint Text="{DynamicResource S.Settings.ProfilesHint}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel Spacing="12">
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Template.Title}" />
+                <ItemsControl ItemsSource="{Binding TemplateList}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:TemplateItem">
+                      <Border Classes="tile">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+                          <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource B.AccentSoft}" Margin="0,0,12,0">
+                            <ctl:LineIcon Icon="{Binding Icon}" Size="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                          </Border>
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Summary}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                          <Border Grid.Column="2" Classes="pill" IsVisible="{Binding IsBuiltIn}" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource S.Template.BuiltIn}" />
+                          </Border>
+                          <Button Grid.Column="3" Classes="icon" ToolTip.Tip="{DynamicResource S.Template.Rename}" IsVisible="{Binding !IsBuiltIn}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).RenameTemplateCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="pencil" Size="15" />
+                          </Button>
+                          <Button Grid.Column="4" Classes="icon danger" ToolTip.Tip="{DynamicResource S.Template.Delete}" IsVisible="{Binding !IsBuiltIn}"
+                                  Command="{Binding $parent[UserControl].((vm:SettingsTabViewModel)DataContext).DeleteTemplateCommand}" CommandParameter="{Binding}">
+                            <ctl:LineIcon Icon="trash-2" Size="15" />
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ctl:Hint Text="{DynamicResource S.Template.Hint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Integration -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="link" Text="{DynamicResource S.Settings.Integration}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel>
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Integration.FileType}" VerticalAlignment="Center" />
+                  <Border Grid.Column="1" Classes="pill headpill" Classes.success="{Binding FileTypeRegistered}" Classes.warning="{Binding !FileTypeRegistered}" IsVisible="{Binding CanRegisterFileType}">
+                    <TextBlock Text="{Binding FileTypeStatus}" />
+                  </Border>
+                </Grid>
+                <ctl:SettingRow Label="{DynamicResource S.Integration.FileTypeLabel}" Icon="file-json" Info="{DynamicResource S.Integration.FileTypeText}" IsVisible="{Binding CanRegisterFileType}">
+                  <Button Classes="w220" Command="{Binding RegisterFileTypeCommand}">
+                    <ctl:IconLabel Icon="file-json" Text="{Binding FileTypeButton}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:Hint Text="{DynamicResource S.Integration.MacHint}" IsVisible="{Binding ShowMacFileTypeHint}" Always="True" />
+                <ctl:Hint Text="{DynamicResource S.Portable.NoSystemChanges}" IsVisible="{Binding IsPortable}" Always="True" />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Integration.Paths}" />
+                <Grid ColumnDefinitions="130,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                  <TextBlock Text="{DynamicResource S.Integration.DataFolder}" VerticalAlignment="Center" Margin="0,0,0,8" />
+                  <ctl:PathPill Grid.Column="1" Text="{Binding DataDirectory}" Margin="0,0,8,8" />
+                  <Button Grid.Column="2" Classes="icon" Command="{Binding OpenDataFolderCommand}" ToolTip.Tip="{DynamicResource S.Settings.OpenDataFolder}" Margin="0,0,0,8">
+                    <ctl:LineIcon Icon="folder-open" Size="16" />
+                  </Button>
+                  <TextBlock Grid.Row="1" Text="{DynamicResource S.Integration.BackupFolder}" VerticalAlignment="Center" Margin="0,0,0,8" />
+                  <ctl:PathPill Grid.Row="1" Grid.Column="1" Text="{Binding BackupDirectory}" Margin="0,0,8,8" />
+                  <Button Grid.Row="1" Grid.Column="2" Classes="icon" Command="{Binding OpenBackupsCommand}" ToolTip.Tip="{DynamicResource S.Settings.OpenBackups}" Margin="0,0,0,8">
+                    <ctl:LineIcon Icon="folder-open" Size="16" />
+                  </Button>
+                  <TextBlock Grid.Row="2" Text="{DynamicResource S.Integration.AppFolder}" VerticalAlignment="Center" />
+                  <ctl:PathPill Grid.Row="2" Grid.Column="1" Text="{Binding AppDirectory}" Margin="0,0,8,0" />
+                  <Button Grid.Row="2" Grid.Column="2" Classes="icon" Command="{Binding OpenAppFolderCommand}" ToolTip.Tip="{DynamicResource S.Integration.AppFolder}">
+                    <ctl:LineIcon Icon="folder-open" Size="16" />
+                  </Button>
+                </Grid>
+                <ctl:Hint Text="{DynamicResource S.Integration.PortableHint}" />
+              </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+              <StackPanel>
+                <TextBlock Classes="cardtitle" Text="{DynamicResource S.Testing.Title}" />
+                <ctl:SettingRow Label="{DynamicResource S.Sample.Title}" Icon="flask-conical" Info="{DynamicResource S.Sample.Info}">
+                  <StackPanel Spacing="6" Width="220">
+                    <Button Classes="w220 primary" Command="{Binding AddSampleSourceCommand}">
+                      <ctl:IconLabel Icon="sparkles" Text="{DynamicResource S.Sample.Add}" />
+                    </Button>
+                    <Button Classes="w220" Command="{Binding RemoveSampleSourceCommand}" IsEnabled="{Binding HasSampleSource}">
+                      <ctl:IconLabel Icon="trash-2" Text="{DynamicResource S.Sample.Remove}" />
+                    </Button>
+                  </StackPanel>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Sample.Cleanup}" Icon="eraser" Info="{DynamicResource S.Sample.CleanupInfo}">
+                  <Button Classes="w220" Command="{Binding CleanupSampleCommand}" IsEnabled="{Binding CanCleanupSample}">
+                    <ctl:IconLabel Icon="eraser" Text="{DynamicResource S.Sample.CleanupButton}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Testing.Port}" Icon="network" Info="{DynamicResource S.Testing.PortInfo}">
+                  <StackPanel Spacing="6" Width="220">
+                    <TextBox Text="{Binding TestHost}" PlaceholderText="{DynamicResource S.Testing.HostWatermark}" Width="220" />
+                    <NumericUpDown Value="{Binding TestPort}" Minimum="1" Maximum="65535" Increment="1" FormatString="0" Width="220" MinWidth="220" HorizontalAlignment="Left" />
+                    <Button Classes="w220" Command="{Binding TestConnectionCommand}">
+                      <ctl:IconLabel Icon="plug-zap" Text="{DynamicResource S.Testing.Test}" />
+                    </Button>
+                  </StackPanel>
+                </ctl:SettingRow>
+                <Border Classes="notice" Classes.danger="{Binding !TestOk}" IsVisible="{Binding HasTestResult}" Margin="0,0,0,8">
+                  <SelectableTextBlock Text="{Binding TestResult}" TextWrapping="Wrap" />
+                </Border>
+                <ctl:SettingRow Label="{DynamicResource S.Testing.Database}" Icon="database" Info="{DynamicResource S.Testing.DatabaseInfo}">
+                  <Button Classes="w220" Command="{Binding CheckDatabaseCommand}">
+                    <ctl:IconLabel Icon="badge-check" Text="{DynamicResource S.Testing.CheckDb}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Testing.Diagnostics}" Icon="file-search" Info="{DynamicResource S.Testing.DiagnosticsInfo}">
+                  <Button Classes="w220" Command="{Binding ExportDiagnosticsCommand}">
+                    <ctl:IconLabel Icon="file-text" Text="{DynamicResource S.Testing.Export}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Testing.Layout}" Icon="layout-grid">
+                  <Button Classes="w220" Command="{Binding ResetLayoutCommand}">
+                    <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Testing.Reset}" />
+                  </Button>
+                </ctl:SettingRow>
+                <ctl:SettingRow Label="{DynamicResource S.Testing.ResetSettings}" Icon="settings">
+                  <Button Classes="w220 danger" Command="{Binding ResetSettingsCommand}">
+                    <ctl:IconLabel Icon="list-restart" Text="{DynamicResource S.Testing.Reset}" />
+                  </Button>
+                </ctl:SettingRow>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== Diagnostics -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="stethoscope" Text="{DynamicResource S.Settings.Diagnostics}" /></TabItem.Header>
+        <ScrollViewer>
+          <StackPanel Classes="settingspage">
+            <Border Classes="card">
+              <StackPanel Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Diag.Title}" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="ghost small" Command="{Binding CopyDiagnosticsCommand}">
+                      <ctl:IconLabel Icon="copy" Text="{DynamicResource S.Diag.Copy}" />
+                    </Button>
+                    <Button Classes="ghost small" Command="{Binding RefreshDiagnosticsCommand}">
+                      <ctl:IconLabel Icon="refresh-cw" Text="{DynamicResource S.Diag.Refresh}" />
+                    </Button>
+                  </StackPanel>
+                </Grid>
+                <TextBlock Text="{DynamicResource S.Diag.Intro}" Classes="muted small" TextWrapping="Wrap" Margin="0,0,0,6" />
+                <ItemsControl ItemsSource="{Binding DiagItems}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:DiagItem">
+                      <Grid ColumnDefinitions="Auto,200,*,Auto" MinHeight="32" Classes="diagrow">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <SelectableTextBlock Grid.Column="2" Text="{Binding Value}" VerticalAlignment="Center" TextWrapping="Wrap" Classes="small" Margin="0,4,8,4" />
+                        <Ellipse Grid.Column="3" Width="9" Height="9" Classes="livedot" Classes.on="{Binding IsOk}" Classes.off="{Binding IsWarning}"
+                                 IsVisible="{Binding State, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" VerticalAlignment="Center" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="cardtitle" Text="{DynamicResource S.Diag.Log}" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="ghost small" Command="{Binding OpenLogFolderCommand}">
+                    <ctl:IconLabel Icon="folder-open" Text="{DynamicResource S.Diag.OpenLog}" />
+                  </Button>
+                </Grid>
+                <ctl:PathPill Text="{Binding LogFile}" />
+                <Border Classes="logbox">
+                  <ScrollViewer MaxHeight="280" HorizontalScrollBarVisibility="Auto">
+                    <SelectableTextBlock Text="{Binding LogTail}" Classes="mono small" />
+                  </ScrollViewer>
+                </Border>
+                <ctl:Hint Text="{DynamicResource S.Diag.LogHint}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================================================== About -->
+      <TabItem>
+        <TabItem.Header><ctl:IconLabel Icon="info" Text="{DynamicResource S.Tab.About}" /></TabItem.Header>
+        <!-- Data context set in code: a binding would turn null while the page is not shown -->
+        <v:AboutView x:Name="AboutPage" />
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Nexode.App.ViewModels"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.TrashView"
+             x:DataType="vm:TrashTabViewModel">
+  <DockPanel Margin="36,28,36,28" MaxWidth="1000">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+      <StackPanel Spacing="4">
+        <TextBlock Text="{DynamicResource S.Tab.Trash}" Classes="h1" />
+        <TextBlock Text="{Binding RetentionText}" Classes="muted" />
+      </StackPanel>
+      <Button Grid.Column="1" Classes="danger" Command="{Binding EmptyCommand}" IsEnabled="{Binding !IsEmpty}" VerticalAlignment="Top">
+        <ctl:IconLabel Icon="trash-2" Text="{DynamicResource S.Trash.Empty}" />
+      </Button>
+    </Grid>
+    <Panel>
+      <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding Items}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:TrashItem">
+              <Border Classes="card" Padding="14,10" Margin="0,0,0,8">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                  <ctl:LineIcon Icon="{Binding Icon}" Size="17" Margin="0,0,12,0" Foreground="{DynamicResource B.TextSecondary}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding KindText}" Classes="muted small" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding DeletedText}" Classes="muted small" VerticalAlignment="Center" Margin="12,0" />
+                  <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:TrashTabViewModel)DataContext).RestoreCommand}" CommandParameter="{Binding}">
+                    <ctl:IconLabel Icon="rotate-ccw" Text="{DynamicResource S.Trash.Restore}" />
+                  </Button>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+      <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+        <ctl:LineIcon Icon="trash-2" Size="34" HorizontalAlignment="Center" Foreground="{DynamicResource B.TextSecondary}" />
+        <TextBlock Text="{DynamicResource S.Trash.IsEmpty}" Classes="muted" />
+      </StackPanel>
+    </Panel>
+  </DockPanel>
+</UserControl>

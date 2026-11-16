@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Nexode.App.ViewModels"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.HistoryView"
+             x:DataType="vm:HistoryTabViewModel">
+  <DockPanel Margin="36,28,36,28" MaxWidth="1100">
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,16">
+      <StackPanel Spacing="4">
+        <TextBlock Text="{Binding Title}" Classes="h1" />
+        <TextBlock Text="{Binding Subtitle}" Classes="muted" />
+      </StackPanel>
+      <TextBox Grid.Column="1" Text="{Binding Filter}" Width="220" Margin="0,0,8,0" VerticalAlignment="Top" PlaceholderText="{DynamicResource S.History.Filter}">
+        <TextBox.InnerLeftContent><ctl:LineIcon Icon="search" Size="14" Margin="10,0,2,0" Foreground="{DynamicResource B.TextSecondary}" /></TextBox.InnerLeftContent>
+      </TextBox>
+      <Button Grid.Column="2" Classes="danger" Command="{Binding ClearCommand}" IsEnabled="{Binding !IsEmpty}" VerticalAlignment="Top">
+        <ctl:IconLabel Icon="trash-2" Text="{DynamicResource S.History.Clear}" />
+      </Button>
+    </Grid>
+    <ctl:InfoCard DockPanel.Dock="Top" Classes="warning" Icon="circle-alert" FollowHints="False" Dismissible="False" Text="{DynamicResource S.History.OffText}"
+                  Wanted="{Binding IsOff}" IsVisible="{Binding IsOff}" Margin="0,0,0,12" />
+    <Panel>
+      <Border Classes="card" Padding="6">
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{Binding Rows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:HistoryRow">
+                <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10,7"
+                        Command="{Binding $parent[UserControl].((vm:HistoryTabViewModel)DataContext).OpenCommand}" CommandParameter="{Binding}">
+                  <Grid ColumnDefinitions="Auto,2*,2*,150,60,110">
+                    <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="0,0,12,0" Foreground="{DynamicResource B.TextSecondary}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2" Text="{Binding Target}" Classes="mono small muted" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="8,0" />
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Day}" Classes="small" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding When}" Classes="small muted" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="4" Text="{Binding DurationText}" Classes="mono small muted" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" />
+                    <Border Grid.Column="5" Classes="pill" Classes.danger="{Binding HasError}" HorizontalAlignment="Right" ToolTip.Tip="{Binding Error}">
+                      <TextBlock Text="{Binding ResultText}" />
+                    </Border>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Border>
+      <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+        <ctl:LineIcon Icon="history" Size="34" HorizontalAlignment="Center" Foreground="{DynamicResource B.TextSecondary}" />
+        <TextBlock Text="{DynamicResource S.History.Empty}" Classes="muted" />
+      </StackPanel>
+    </Panel>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="using:Nexode.App.ViewModels.Sessions"
+             xmlns:ss="using:Nexode.App.Views.Sessions"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.Sessions.TerminalSessionView"
+             x:DataType="s:TerminalTabViewModel">
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Classes="sessionbar">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Ellipse Width="8" Height="8" Classes="statedot" Classes.on="{Binding IsConnected}" Classes.off="{Binding IsEnded}" />
+          <TextBlock Text="{Binding StatusText}" Classes="small" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding RemoteTitle}" Classes="small muted mono" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" MaxWidth="420" />
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2">
+          <Button Classes="ghost small" Command="{Binding OpenSftpCommand}" IsVisible="{Binding IsSsh}" ToolTip.Tip="{DynamicResource S.Menu.OpenSftp}">
+            <ctl:IconLabel Icon="folder-lock" Text="SFTP" />
+          </Button>
+          <Button Classes="icon small" Click="CopyClick" ToolTip.Tip="{DynamicResource S.Terminal.Copy}"><ctl:LineIcon Icon="copy" Size="17" /></Button>
+          <Button Classes="icon small" Click="PasteClick" ToolTip.Tip="{DynamicResource S.Terminal.Paste}"><ctl:LineIcon Icon="clipboard-paste" Size="17" /></Button>
+          <Button Classes="icon small" Click="SmallerClick" ToolTip.Tip="{DynamicResource S.Terminal.Smaller}"><ctl:LineIcon Icon="minus" Size="17" /></Button>
+          <Button Classes="icon small" Click="LargerClick" ToolTip.Tip="{DynamicResource S.Terminal.Larger}"><ctl:LineIcon Icon="plus" Size="17" /></Button>
+          <Border Classes="vdivider" Margin="6,4" />
+          <Button Classes="icon small" Command="{Binding ReconnectCommand}" ToolTip.Tip="{DynamicResource S.Session.Reconnect}"><ctl:LineIcon Icon="refresh-cw" Size="17" /></Button>
+          <Button Classes="icon small danger" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsConnected}" ToolTip.Tip="{DynamicResource S.Session.Disconnect}"><ctl:LineIcon Icon="unplug" Size="17" /></Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Panel>
+      <ctl:TerminalView x:Name="Term" Emulator="{Binding Terminal}" FontSize="{Binding FontSize, Mode=TwoWay}">
+        <ctl:TerminalView.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="{DynamicResource S.Terminal.Copy}" InputGesture="Ctrl+Shift+C" Click="CopyClick"><MenuItem.Icon><ctl:LineIcon Icon="copy" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="{DynamicResource S.Terminal.Paste}" InputGesture="Ctrl+Shift+V" Click="PasteClick"><MenuItem.Icon><ctl:LineIcon Icon="clipboard-paste" /></MenuItem.Icon></MenuItem>
+            <MenuItem Header="{DynamicResource S.Terminal.SelectAll}" Click="SelectAllClick"><MenuItem.Icon><ctl:LineIcon Icon="text-select" /></MenuItem.Icon></MenuItem>
+            <Separator />
+            <MenuItem Header="{DynamicResource S.Terminal.Clear}" Click="ClearClick"><MenuItem.Icon><ctl:LineIcon Icon="list-restart" /></MenuItem.Icon></MenuItem>
+          </ContextMenu>
+        </ctl:TerminalView.ContextMenu>
+      </ctl:TerminalView>
+      <ss:SessionOverlay />
+    </Panel>
+  </DockPanel>
+</UserControl>

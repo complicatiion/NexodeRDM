@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Nexode.App.ViewModels"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.FtpServerView"
+             x:DataType="vm:FtpServerTabViewModel">
+  <ScrollViewer>
+    <StackPanel Margin="36,28,36,28" MaxWidth="1000" Spacing="16">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="4">
+          <TextBlock Text="{Binding Title}" Classes="h1" />
+          <TextBlock Text="{DynamicResource S.FtpServer.Subtitle}" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+        <Border Grid.Column="1" Classes="pill" Classes.success="{Binding IsRunning}" VerticalAlignment="Top">
+          <ctl:IconLabel Icon="radio" Text="{Binding StatusText}" />
+        </Border>
+      </Grid>
+
+      <Border Classes="card">
+        <StackPanel>
+          <TextBlock Classes="cardtitle" Text="{DynamicResource S.FtpServer.Share}" />
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.Folder}" Icon="folder-open">
+            <Grid ColumnDefinitions="*,Auto" Width="460">
+              <TextBox Text="{Binding Folder}" Classes="mono" IsEnabled="{Binding IsStopped}" />
+              <Button Grid.Column="1" Margin="6,0,0,0" Command="{Binding BrowseCommand}" IsEnabled="{Binding IsStopped}">
+                <ctl:IconLabel Icon="folder-search" Text="{DynamicResource S.FtpServer.Browse}" />
+              </Button>
+            </Grid>
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.Port}" Icon="hash" Info="{DynamicResource S.FtpServer.PortInfo}">
+            <TextBox Text="{Binding Port}" Classes="w220 mono" IsEnabled="{Binding IsStopped}" />
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.Anonymous}" Icon="user-round-x" Info="{DynamicResource S.FtpServer.AnonymousInfo}">
+            <ToggleSwitch IsChecked="{Binding Anonymous}" IsEnabled="{Binding IsStopped}" />
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.User}" Icon="user" IsVisible="{Binding UsesLogin}">
+            <TextBox Text="{Binding User}" Classes="w220 mono" IsEnabled="{Binding IsStopped}" />
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.Password}" Icon="key-round" Info="{DynamicResource S.FtpServer.PasswordInfo}" IsVisible="{Binding UsesLogin}">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBox Text="{Binding Password}" Classes="w220 mono" IsEnabled="{Binding IsStopped}" />
+              <Button Classes="icon" Command="{Binding NewPasswordCommand}" IsEnabled="{Binding IsStopped}" ToolTip.Tip="{DynamicResource S.FtpServer.NewPassword}">
+                <ctl:LineIcon Icon="refresh-cw" Size="15" />
+              </Button>
+              <Button Classes="icon" Command="{Binding CopyCommand}" CommandParameter="{Binding Password}" ToolTip.Tip="{DynamicResource S.FtpServer.CopyPassword}">
+                <ctl:LineIcon Icon="copy" Size="15" />
+              </Button>
+            </StackPanel>
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.ReadOnly}" Icon="lock" Info="{DynamicResource S.FtpServer.ReadOnlyInfo}" IsVisible="{Binding UsesLogin}">
+            <ToggleSwitch IsChecked="{Binding ReadOnly}" IsEnabled="{Binding IsStopped}" />
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.Tls}" Icon="shield-check" Info="{DynamicResource S.FtpServer.TlsInfo}">
+            <ToggleSwitch IsChecked="{Binding Tls}" IsEnabled="{Binding IsStopped}" />
+          </ctl:SettingRow>
+          <ctl:SettingRow Label="{DynamicResource S.FtpServer.Passive}" Icon="arrow-left-right" Info="{DynamicResource S.FtpServer.PassiveInfo}">
+            <TextBox Text="{Binding Passive}" Classes="w220 mono" IsEnabled="{Binding IsStopped}" />
+          </ctl:SettingRow>
+          <Border Classes="notice" IsVisible="{Binding HasError}" Margin="0,8,0,0">
+            <TextBlock Text="{Binding Error}" TextWrapping="Wrap" Foreground="{DynamicResource B.DangerText}" />
+          </Border>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,10,0,0">
+            <Button Classes="w220 danger" Command="{Binding StopCommand}" IsVisible="{Binding IsRunning}">
+              <ctl:IconLabel Icon="square" Text="{DynamicResource S.FtpServer.Stop}" />
+            </Button>
+            <Button Classes="w220 primary" Command="{Binding StartCommand}" IsVisible="{Binding IsStopped}">
+              <ctl:IconLabel Icon="play" Text="{DynamicResource S.FtpServer.Start}" />
+            </Button>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" IsVisible="{Binding IsRunning}">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="cardtitle" Text="{DynamicResource S.FtpServer.Addresses}" />
+          <ItemsControl ItemsSource="{Binding Addresses}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:FtpAddressRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                  <SelectableTextBlock Text="{Binding Url}" Classes="mono" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="icon small" ToolTip.Tip="{DynamicResource S.FtpServer.CopyAddress}"
+                          Command="{Binding $parent[UserControl].((vm:FtpServerTabViewModel)DataContext).CopyCommand}" CommandParameter="{Binding Url}">
+                    <ctl:LineIcon Icon="copy" Size="14" />
+                  </Button>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel IsVisible="{Binding HasFingerprint}" Spacing="2" Margin="0,6,0,0">
+            <TextBlock Text="{DynamicResource S.FtpServer.Fingerprint}" Classes="small muted" />
+            <SelectableTextBlock Text="{Binding Fingerprint}" Classes="mono small" TextWrapping="Wrap" />
+          </StackPanel>
+          <ctl:Hint Text="{DynamicResource S.FtpServer.FirewallHint}" Always="True" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="cardtitle" Text="{DynamicResource S.FtpServer.Activity}" />
+          <TextBlock Text="{DynamicResource S.FtpServer.NoActivity}" Classes="muted" IsVisible="{Binding !HasEvents}" />
+          <ItemsControl ItemsSource="{Binding Events}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:FtpEventRow">
+                <Grid ColumnDefinitions="Auto,80,130,*" Margin="0,2">
+                  <ctl:LineIcon Icon="{Binding Icon}" Size="14" Margin="0,0,10,0" Foreground="{DynamicResource B.AccentText}" Classes.danger="{Binding IsWarning}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Time}" Classes="small muted mono" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2" Text="{Binding Client}" Classes="small mono" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="3" Text="{Binding Text}" Classes="small" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Text}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="using:Nexode.App.ViewModels.Sessions"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.Sessions.SessionOverlay"
+             x:DataType="s:SessionTabViewModel">
+  <!-- Connecting / failed / ended state shown above the session surface: everything centered -->
+  <Panel>
+    <Border Classes="card overlay" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="380" MaxWidth="560" Padding="28,24"
+            IsVisible="{Binding IsConnecting}">
+      <StackPanel Spacing="14" HorizontalAlignment="Center">
+        <Border Classes="overlayicon" HorizontalAlignment="Center">
+          <ctl:LineIcon Icon="plug-zap" Size="26" Foreground="{DynamicResource B.AccentText}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <TextBlock Text="{Binding StatusText}" Classes="h3" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+        <ProgressBar IsIndeterminate="True" MinWidth="260" />
+        <Button HorizontalAlignment="Center" Command="{Binding DisconnectCommand}">
+          <ctl:IconLabel Icon="x" Text="{DynamicResource S.Cancel}" />
+        </Button>
+      </StackPanel>
+    </Border>
+    <Border Classes="card overlay" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="380" MaxWidth="560" Padding="28,24"
+            IsVisible="{Binding IsEnded}">
+      <StackPanel Spacing="14" HorizontalAlignment="Center">
+        <Border Classes="overlayicon warn" HorizontalAlignment="Center">
+          <ctl:LineIcon Icon="unplug" Size="26" Foreground="{DynamicResource B.WarningText}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <TextBlock Text="{Binding StatusText}" Classes="h3" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+        <SelectableTextBlock Text="{Binding Error}" IsVisible="{Binding HasError}" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center"
+                             Foreground="{DynamicResource B.DangerText}" MaxWidth="480" />
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" IsVisible="{Binding IsReconnecting}">
+          <ctl:LineIcon Icon="refresh-ccw" Size="15" Foreground="{DynamicResource B.AccentText}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding ReconnectText}" TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Center" />
+          <Button Classes="ghost small" Command="{Binding CancelReconnectCommand}">
+            <ctl:IconLabel Icon="x" Text="{DynamicResource S.Cancel}" />
+          </Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" Margin="0,4,0,0">
+          <Button Command="{Binding CloseTabCommand}">
+            <ctl:IconLabel Icon="x" Text="{DynamicResource S.Tabs.Close}" />
+          </Button>
+          <Button Classes="primary" Command="{Binding ReconnectCommand}">
+            <ctl:IconLabel Icon="refresh-cw" Text="{DynamicResource S.Session.Reconnect}" />
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </Panel>
+</UserControl>

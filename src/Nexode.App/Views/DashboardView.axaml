@@ -1,0 +1,214 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Nexode.App.ViewModels"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.DashboardView"
+             x:DataType="vm:DashboardTabViewModel">
+  <UserControl.Resources>
+    <!-- Entry with a live status dot -->
+    <DataTemplate x:Key="StatusRowTemplate" DataType="vm:StatusRow">
+      <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8,6"
+              Command="{Binding $parent[UserControl].((vm:DashboardTabViewModel)DataContext).OpenEntryCommand}" CommandParameter="{Binding}">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Panel Margin="0,0,12,0">
+            <ctl:LineIcon Icon="{Binding Icon}" Size="16" Foreground="{DynamicResource B.TextSecondary}" />
+            <Ellipse Classes="livedot" Classes.on="{Binding IsOnline}" Classes.off="{Binding IsOffline}" IsVisible="{Binding HasState}" />
+          </Panel>
+          <StackPanel Grid.Column="1">
+            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding Detail}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <TextBlock Grid.Column="2" Text="{Binding LatencyText}" Classes="mono small muted" VerticalAlignment="Center" />
+        </Grid>
+      </Button>
+    </DataTemplate>
+  </UserControl.Resources>
+  <ScrollViewer>
+    <StackPanel MaxWidth="1200" Margin="36,28,36,36" Spacing="20">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="4">
+          <TextBlock Text="{DynamicResource S.Tab.Dashboard}" Classes="h1" />
+          <TextBlock Text="{Binding SourceName}" Classes="muted" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Top">
+          <Button Classes="icon" Command="{Binding CheckNowCommand}" IsEnabled="{Binding StatusEnabled}" ToolTip.Tip="{DynamicResource S.Status.CheckNow}">
+            <ctl:LineIcon Icon="refresh-cw" Size="17" />
+          </Button>
+          <Button Classes="icon" Command="{Binding OpenWindowCommand}" ToolTip.Tip="{DynamicResource S.Dash.OpenWindow}">
+            <ctl:LineIcon Icon="app-window" Size="17" />
+          </Button>
+          <Button Classes="icon" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{DynamicResource S.Dash.Settings}">
+            <ctl:LineIcon Icon="settings" Size="17" />
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <ctl:InfoCard HintId="dashboard.livestatus" Icon="activity" Text="{DynamicResource S.Dash.StatusHint}" />
+
+      <!-- KPIs -->
+      <ItemsControl ItemsSource="{Binding Kpis}" IsVisible="{Binding ShowKpis}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><UniformGrid Columns="6" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="vm:Kpi">
+            <Border Classes="card" Margin="0,0,12,0" Padding="16,14">
+              <StackPanel Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ctl:LineIcon Icon="{Binding Icon}" Size="15" Foreground="{DynamicResource B.AccentText}" />
+                  <TextBlock Text="{Binding Title}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <TextBlock Text="{Binding Value}" FontSize="28" FontWeight="SemiBold" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <Grid ColumnDefinitions="*,18,*">
+        <!-- Left column -->
+        <StackPanel Spacing="18">
+          <Border Classes="card" IsVisible="{Binding ShowStatus}">
+            <StackPanel Spacing="10">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{DynamicResource S.Status.Section}" Classes="section" />
+                <Border Grid.Column="1" Classes="pill success" IsVisible="{Binding AllOnline}">
+                  <ctl:IconLabel Icon="circle-check" Text="{DynamicResource S.Status.AllOnline}" />
+                </Border>
+              </Grid>
+              <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding StatusEnabled}">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <Ellipse Classes="livedot on" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding OnlineCount}" FontSize="22" FontWeight="SemiBold" />
+                </StackPanel>
+                <ProgressBar Grid.Column="1" Value="{Binding OnlineFraction}" Maximum="1" Height="6" MinHeight="6" Margin="14,0" VerticalAlignment="Center"
+                             Foreground="{DynamicResource B.Success}" Background="{DynamicResource B.DangerSoft}" CornerRadius="3" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding OfflineCount}" FontSize="22" FontWeight="SemiBold" />
+                  <Ellipse Classes="livedot off" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </StackPanel>
+              </Grid>
+              <TextBlock Text="{Binding StatusSummary}" Classes="muted small" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Offline}" ItemTemplate="{StaticResource StatusRowTemplate}" IsVisible="{Binding HasOffline}" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding ShowKinds}">
+            <StackPanel Spacing="12">
+              <TextBlock Text="{DynamicResource S.Dash.ByKind}" Classes="section" />
+              <ItemsControl ItemsSource="{Binding Kinds}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:KindCount">
+                    <Grid ColumnDefinitions="Auto,110,*,40" Margin="0,4">
+                      <ctl:LineIcon Icon="{Binding Icon}" Size="15" Margin="0,0,10,0" Foreground="{DynamicResource B.TextSecondary}" />
+                      <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                      <ProgressBar Grid.Column="2" Value="{Binding Fraction}" Maximum="1" Height="6" MinHeight="6" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource B.Accent}" Background="{DynamicResource B.SurfaceRaised}" CornerRadius="3" />
+                      <TextBlock Grid.Column="3" Text="{Binding Count}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{DynamicResource S.Dash.Empty}" Classes="muted" IsVisible="{Binding !HasKinds}" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding ShowRecent}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{DynamicResource S.Start.Recent}" Classes="section" />
+              <ItemsControl ItemsSource="{Binding Recent}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:EntryTile">
+                    <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8,6"
+                            Command="{Binding $parent[UserControl].((vm:DashboardTabViewModel)DataContext).OpenEntryCommand}" CommandParameter="{Binding}">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="0,0,12,0" Foreground="{DynamicResource B.TextSecondary}" />
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Detail}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{DynamicResource S.Start.NoRecent}" Classes="muted" IsVisible="{Binding !HasRecent}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- Right column -->
+        <StackPanel Grid.Column="2" Spacing="18">
+          <Border Classes="card" IsVisible="{Binding ShowFavorites}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{DynamicResource S.Start.Favorites}" Classes="section" />
+              <ItemsControl ItemsSource="{Binding Favorites}" ItemTemplate="{StaticResource StatusRowTemplate}" />
+              <TextBlock Text="{DynamicResource S.Dash.NoFavorites}" Classes="muted" IsVisible="{Binding !HasFavorites}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding ShowEnvironments}">
+            <StackPanel Spacing="12">
+              <TextBlock Text="{DynamicResource S.Dash.Environments}" Classes="section" />
+              <ItemsControl ItemsSource="{Binding Environments}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:KindCount">
+                    <Grid ColumnDefinitions="110,*,40" Margin="0,4">
+                      <TextBlock Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                      <ProgressBar Grid.Column="1" Value="{Binding Fraction}" Maximum="1" Height="6" MinHeight="6" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource B.Accent}" Background="{DynamicResource B.SurfaceRaised}" CornerRadius="3" />
+                      <TextBlock Grid.Column="2" Text="{Binding Count}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{DynamicResource S.Dash.NoEnvironments}" Classes="muted" IsVisible="{Binding !HasEnvironments}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding ShowHistory}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{DynamicResource S.History.Section}" Classes="section" />
+              <ItemsControl ItemsSource="{Binding History}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:HistoryRow">
+                    <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8,6"
+                            Command="{Binding $parent[UserControl].((vm:DashboardTabViewModel)DataContext).OpenEntryCommand}" CommandParameter="{Binding}">
+                      <Grid ColumnDefinitions="Auto,*,Auto">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="0,0,12,0" Foreground="{DynamicResource B.TextSecondary}" />
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding When}" Classes="muted small" />
+                        </StackPanel>
+                        <Border Grid.Column="2" Classes="pill" Classes.danger="{Binding HasError}" ToolTip.Tip="{Binding Error}">
+                          <TextBlock Text="{Binding ResultText}" />
+                        </Border>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{DynamicResource S.History.Empty}" Classes="muted" IsVisible="{Binding !HasHistory}" TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="card" IsVisible="{Binding ShowSource}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{DynamicResource S.Dash.DataSource}" Classes="section" />
+              <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                <ctl:LineIcon Icon="database" Size="14" Margin="0,0,10,6" Foreground="{DynamicResource B.TextSecondary}" />
+                <ctl:PathPill Grid.Column="1" Text="{Binding SourcePath}" Margin="0,0,0,6" />
+                <ctl:LineIcon Grid.Row="1" Icon="hard-drive" Size="14" Margin="0,0,10,6" Foreground="{DynamicResource B.TextSecondary}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SourceSize}" Margin="0,0,0,6" />
+                <ctl:LineIcon Grid.Row="2" Icon="archive" Size="14" Margin="0,0,10,6" Foreground="{DynamicResource B.TextSecondary}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding BackupText}" Margin="0,0,0,6" TextWrapping="Wrap" />
+                <ctl:LineIcon Grid.Row="3" Icon="shield-check" Size="14" Margin="0,0,10,0" Foreground="{DynamicResource B.TextSecondary}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding VaultText}" TextWrapping="Wrap" />
+              </Grid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

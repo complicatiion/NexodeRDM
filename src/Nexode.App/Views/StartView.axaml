@@ -1,0 +1,228 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Nexode.App.ViewModels"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.StartView"
+             x:DataType="vm:StartTabViewModel">
+  <ScrollViewer>
+    <StackPanel x:Name="Sections" MaxWidth="980" Margin="40,36,40,40" Spacing="26">
+      <Grid ColumnDefinitions="Auto,*">
+        <Path Classes="logo" Width="48" Height="48" Margin="0,0,18,0" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Text="{Binding Greeting}" FontSize="30" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" LineHeight="38" />
+      </Grid>
+
+      <!-- Quick connect / search -->
+      <StackPanel Spacing="8" x:Name="SecSearch" IsVisible="{Binding ShowSearch}">
+        <TextBox x:Name="QuickBox" Classes="search" FontSize="15" MinHeight="44" Text="{Binding Query}"
+                 PlaceholderText="{DynamicResource S.Start.QuickWatermark}">
+          <TextBox.InnerLeftContent>
+            <ctl:LineIcon Icon="search" Size="18" Margin="12,0,4,0" Foreground="{DynamicResource B.TextSecondary}" />
+          </TextBox.InnerLeftContent>
+          <TextBox.KeyBindings>
+            <KeyBinding Gesture="Enter" Command="{Binding SubmitCommand}" />
+          </TextBox.KeyBindings>
+        </TextBox>
+        <Button Classes="ghost" IsVisible="{Binding HasQuickEntry}" Command="{Binding CreateQuickCommand}" HorizontalAlignment="Left">
+          <ctl:IconLabel Icon="plus" Text="{Binding QuickText}" />
+        </Button>
+        <Border Classes="card" Padding="6" IsVisible="{Binding HasResults}">
+          <ItemsControl ItemsSource="{Binding Results}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:EntryTile">
+                <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10,7"
+                        Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).OpenTileCommand}" CommandParameter="{Binding}">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <ctl:LineIcon Icon="{Binding Icon}" Size="17" Margin="0,0,12,0" Foreground="{DynamicResource B.TextSecondary}" Tint="{Binding IconBrush}" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Detail}" Classes="muted" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding KindText}" Classes="muted small" VerticalAlignment="Center" />
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Border>
+      </StackPanel>
+
+      <!-- Profiles -->
+      <StackPanel Spacing="10" x:Name="SecProfiles" IsVisible="{Binding ShowProfiles}">
+        <TextBlock Text="{DynamicResource S.Start.Profiles}" Classes="section" />
+        <ItemsControl ItemsSource="{Binding Profiles}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).ProfileColumns}" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:ProfileItem">
+              <Button Classes="tilebtn" Margin="0,0,10,10"
+                      Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).OpenProfileCommand}" CommandParameter="{Binding}">
+                <Border Classes="card tilecard">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource B.AccentSoft}" Margin="0,0,12,0">
+                      <ctl:LineIcon Icon="{Binding Icon}" Size="18" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" Tint="{Binding IconBrush}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Summary}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <ctl:LineIcon Grid.Column="2" Icon="circle-play" Size="16" VerticalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                  </Grid>
+                </Border>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- Favorites -->
+      <StackPanel Spacing="10" x:Name="SecFavorites" IsVisible="{Binding ShowFavorites}">
+        <TextBlock Text="{DynamicResource S.Start.Favorites}" Classes="section" />
+        <ItemsControl ItemsSource="{Binding Favorites}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).FavoriteColumns}" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:EntryTile">
+              <Button Classes="tilebtn" Margin="0,0,10,10"
+                      Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).OpenTileCommand}" CommandParameter="{Binding}">
+                <Border Classes="card tilecard">
+                  <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Border Width="36" Height="36" CornerRadius="9" Background="{DynamicResource B.AccentSoft}" Margin="0,0,12,0">
+                      <ctl:LineIcon Icon="{Binding Icon}" Size="18" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" Tint="{Binding IconBrush}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Detail}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="2">
+                      <ctl:LineIcon Icon="heart" Size="13" HorizontalAlignment="Right" Foreground="{DynamicResource B.AccentText}" Filled="True" />
+                      <Button Classes="icon small" IsVisible="{Binding IsWeb}" Padding="3" ToolTip.Tip="{DynamicResource S.Menu.OpenBrowser}"
+                              Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).OpenInBrowserCommand}" CommandParameter="{Binding}">
+                        <ctl:LineIcon Icon="globe" Size="14" />
+                      </Button>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <Grid ColumnDefinitions="*,24,*" x:Name="SecRecentNew" IsVisible="{Binding ShowRecentOrNew}">
+        <!-- Recent -->
+        <StackPanel Spacing="10" x:Name="SecRecent" IsVisible="{Binding ShowRecent}">
+          <TextBlock Text="{DynamicResource S.Start.Recent}" Classes="section" />
+          <Border Classes="card" Padding="6">
+            <Panel>
+              <ItemsControl ItemsSource="{Binding Recent}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:EntryTile">
+                    <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10,7"
+                            Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).OpenTileCommand}" CommandParameter="{Binding}">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="0,0,12,0" Foreground="{DynamicResource B.TextSecondary}" />
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Detail}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <TextBlock Text="{DynamicResource S.Start.NoRecent}" Classes="muted" Margin="10" IsVisible="{Binding !HasRecent}" TextWrapping="Wrap" />
+            </Panel>
+          </Border>
+        </StackPanel>
+
+        <!-- New -->
+        <StackPanel Grid.Column="2" Spacing="10" x:Name="SecNew" IsVisible="{Binding ShowNew}">
+          <TextBlock Text="{DynamicResource S.Start.New}" Classes="section" />
+          <ItemsControl ItemsSource="{Binding NewKinds}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate><UniformGrid Columns="4" /></ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="vm:KindTile">
+                <Button Classes="tilebtn" Margin="0,0,8,8"
+                        Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).NewKindCommand}" CommandParameter="{Binding}">
+                  <Border Classes="card tilecard" Padding="8,12">
+                    <StackPanel Spacing="6">
+                      <ctl:LineIcon Icon="{Binding Icon}" Size="20" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                      <TextBlock Text="{Binding Title}" FontSize="12" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                  </Border>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Grid>
+
+      <!-- Live status (off by default on the home page) -->
+      <StackPanel Spacing="10" x:Name="SecStatus" IsVisible="{Binding ShowStatus}">
+        <TextBlock Text="{DynamicResource S.Status.Section}" Classes="section" />
+        <!-- Dash is created only when a section needs it: bound as data context, so a missing one is no binding error -->
+        <Border Classes="card" DataContext="{Binding Dash}">
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding StatusEnabled}">
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Ellipse Classes="livedot on" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding OnlineCount}" FontSize="20" FontWeight="SemiBold" />
+              </StackPanel>
+              <ProgressBar Grid.Column="1" Value="{Binding OnlineFraction}" Maximum="1" Height="6" MinHeight="6" Margin="14,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource B.Success}" Background="{DynamicResource B.DangerSoft}" CornerRadius="3" />
+              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="{Binding OfflineCount}" FontSize="20" FontWeight="SemiBold" />
+                <Ellipse Classes="livedot off" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </StackPanel>
+            </Grid>
+            <TextBlock Text="{Binding StatusSummary}" Classes="muted small" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding Offline}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:StatusRow">
+                  <Button Classes="ghost" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8,5"
+                          Command="{Binding $parent[UserControl].((vm:StartTabViewModel)DataContext).OpenStatusCommand}" CommandParameter="{Binding}">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <Panel Margin="0,0,12,0">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Foreground="{DynamicResource B.TextSecondary}" />
+                        <Ellipse Classes="livedot off" />
+                      </Panel>
+                      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Detail}" Classes="muted small" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                    </Grid>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!-- Dashboard figures (off by default on the home page) -->
+      <StackPanel Spacing="10" x:Name="SecDashboard" IsVisible="{Binding ShowDashboard}">
+        <TextBlock Text="{DynamicResource S.Dash.Section}" Classes="section" />
+        <ItemsControl DataContext="{Binding Dash}" ItemsSource="{Binding Kpis}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:Kpi">
+              <Border Classes="card" Margin="0,0,10,10" Padding="14,12">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <ctl:LineIcon Icon="{Binding Icon}" Size="16" Margin="0,0,10,0" Foreground="{DynamicResource B.AccentText}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Title}" Classes="muted" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="2" Text="{Binding Value}" FontSize="20" FontWeight="SemiBold" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

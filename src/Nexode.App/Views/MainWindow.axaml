@@ -1,0 +1,471 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Nexode.App.ViewModels"
+        xmlns:v="using:Nexode.App.Views"
+        xmlns:ctl="using:Nexode.App.Controls"
+        xmlns:model="using:Nexode.Core.Model"
+        xmlns:s="using:Nexode.App.ViewModels.Sessions"
+        xmlns:sv="using:Nexode.App.Views.Sessions"
+        x:Class="Nexode.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding WindowTitle}"
+        Icon="/Assets/nexode.ico"
+        Width="1360" Height="860" MinWidth="900" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        DragDrop.AllowDrop="True">
+
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+T" Command="{Binding NewTabCommand}" />
+    <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseTabCommand}" />
+    <KeyBinding Gesture="Ctrl+F4" Command="{Binding CloseTabCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+T" Command="{Binding ReopenTabCommand}" />
+    <KeyBinding Gesture="Ctrl+Tab" Command="{Binding NextTabCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding PreviousTabCommand}" />
+    <KeyBinding Gesture="Ctrl+PageDown" Command="{Binding NextTabCommand}" />
+    <KeyBinding Gesture="Ctrl+PageUp" Command="{Binding PreviousTabCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+N" Command="{Binding NewWindowCommand}" />
+    <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleTreeCommand}" />
+    <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+    <KeyBinding Gesture="Ctrl+L" Command="{Binding ToggleLockCommand}" />
+    <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding OpenSettingsCommand}" />
+    <KeyBinding Gesture="Ctrl+O" Command="{Binding ImportCommand}" />
+  </Window.KeyBindings>
+
+  <Window.DataTemplates>
+    <ctl:StableViewTemplate DataType="{x:Type vm:StartTabViewModel}" View="{x:Type v:StartView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:EntryTabViewModel}" View="{x:Type v:EntryView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:DashboardTabViewModel}" View="{x:Type v:DashboardView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:SettingsTabViewModel}" View="{x:Type v:SettingsView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:AboutTabViewModel}" View="{x:Type v:AboutView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:TrashTabViewModel}" View="{x:Type v:TrashView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:HistoryTabViewModel}" View="{x:Type v:HistoryView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:FtpServerTabViewModel}" View="{x:Type v:FtpServerView}" />
+    <ctl:StableViewTemplate DataType="{x:Type vm:LanSyncTabViewModel}" View="{x:Type v:LanSyncView}" />
+    <DataTemplate DataType="s:TerminalTabViewModel"><sv:TerminalSessionView /></DataTemplate>
+    <ctl:StableViewTemplate DataType="{x:Type s:FileBrowserTabViewModel}" View="{x:Type sv:FileBrowserView}" />
+    <DataTemplate DataType="s:VncTabViewModel"><sv:VncSessionView /></DataTemplate>
+    <DataTemplate DataType="s:RdpTabViewModel"><sv:RdpSessionView /></DataTemplate>
+    <DataTemplate DataType="s:SplitTabViewModel"><sv:SplitSessionView /></DataTemplate>
+    <DataTemplate DataType="s:WebTabViewModel"><sv:WebSessionView /></DataTemplate>
+  </Window.DataTemplates>
+
+  <Grid RowDefinitions="*,Auto">
+    <Grid x:Name="Columns" ColumnDefinitions="Auto,300,Auto,*">
+
+      <!-- ===================================================== Rail -->
+      <Border Grid.Column="0" x:Name="RailBorder" IsVisible="{Binding ShowChrome}" Width="{Binding RailWidth}" Background="{DynamicResource B.BgRail}"
+              BorderBrush="{DynamicResource B.Border}" BorderThickness="0,0,1,0">
+        <DockPanel Margin="8,10,8,10">
+          <Button DockPanel.Dock="Top" Classes="rail" Command="{Binding ToggleRailCommand}" ToolTip.Tip="{DynamicResource S.Tip.ToggleRail}" Margin="0,0,0,10" Padding="6,6">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <Path Classes="logo" Width="26" Height="26" />
+              <TextBlock Text="Nexode" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" IsVisible="{Binding RailExpanded}"
+                         Foreground="{DynamicResource B.TextPrimary}" />
+            </StackPanel>
+          </Button>
+
+          <StackPanel DockPanel.Dock="Bottom" Spacing="2">
+            <Border Classes="divider" Margin="6,4,6,6" />
+            <Button Classes="rail" Command="{Binding OpenTrashCommand}" ToolTip.Tip="{DynamicResource S.Tab.Trash}">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <ctl:LineIcon Icon="trash-2" Size="20" />
+                <TextBlock Text="{DynamicResource S.Tab.Trash}" IsVisible="{Binding RailExpanded}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Border Classes="divider" Margin="6,4,6,6" />
+            <Button Classes="rail" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="{DynamicResource S.Tab.Settings}">
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <ctl:LineIcon Icon="settings" Size="20" />
+                <TextBlock Text="{DynamicResource S.Tab.Settings}" IsVisible="{Binding RailExpanded}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Spacing="2">
+              <ListBox Classes="rail" ItemsSource="{Binding RailItems}" SelectedItem="{Binding SelectedRail}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate DataType="vm:RailItem">
+                    <StackPanel Orientation="Horizontal" Spacing="12" ToolTip.Tip="{Binding Title}">
+                      <ctl:LineIcon Icon="{Binding Icon}" Size="20" />
+                      <TextBlock Text="{Binding Title}" VerticalAlignment="Center"
+                                 IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RailExpanded}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <Border Classes="divider" Margin="6,4,6,6" />
+            </StackPanel>
+
+            <!-- Pinned entries: drop entries from the tree here, drag to reorder, drag out to unpin -->
+            <Border x:Name="PinArea" Background="Transparent" CornerRadius="8" DragDrop.AllowDrop="True" MinHeight="40">
+              <Panel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="420" VerticalAlignment="Top">
+                  <ItemsControl ItemsSource="{Binding Pins}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="vm:PinItem">
+                        <Border Classes="railpin" ToolTip.Tip="{Binding Tooltip}" PointerPressed="PinPressed" PointerMoved="PinMoved" PointerReleased="PinReleased">
+                          <Border.ContextMenu>
+                            <ContextMenu Opening="PinMenuOpening">
+                              <MenuItem Header="{DynamicResource S.Menu.Open}" Click="PinMenuOpen"><MenuItem.Icon><ctl:LineIcon Icon="plug-zap" /></MenuItem.Icon></MenuItem>
+                              <MenuItem Header="{DynamicResource S.Menu.Reveal}" Click="PinMenuReveal"><MenuItem.Icon><ctl:LineIcon Icon="folder-tree" /></MenuItem.Icon></MenuItem>
+                              <MenuItem Header="{DynamicResource S.Menu.PinColor}" Classes="pincolor"><MenuItem.Icon><ctl:LineIcon Icon="palette" /></MenuItem.Icon><Separator /></MenuItem>
+                              <Separator />
+                              <MenuItem Header="{DynamicResource S.Menu.Unpin}" Click="PinMenuUnpin"><MenuItem.Icon><ctl:LineIcon Icon="pin-off" /></MenuItem.Icon></MenuItem>
+                            </ContextMenu>
+                          </Border.ContextMenu>
+                          <StackPanel Orientation="Horizontal" Spacing="12">
+                            <ctl:LineIcon Icon="{Binding Icon}" Size="20" Foreground="{DynamicResource B.TextSecondary}" Tint="{Binding IconBrush}" />
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="120"
+                                       IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).RailExpanded}" />
+                          </StackPanel>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+                <Border x:Name="PinHint" IsVisible="False" Classes="raildrop" CornerRadius="8" Height="40" VerticalAlignment="Top">
+                  <ctl:LineIcon Icon="pin" Size="18" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                </Border>
+              </Panel>
+            </Border>
+          </DockPanel>
+        </DockPanel>
+      </Border>
+
+      <!-- ===================================================== Tree panel -->
+      <Border Grid.Column="1" x:Name="TreePanel" Background="{DynamicResource B.BgPanel}" ClipToBounds="True">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="10,10,10,6">
+            <TextBox x:Name="SearchBox" Classes="search" Text="{Binding Tree.SearchText}" PlaceholderText="{DynamicResource S.Tree.Search}">
+              <TextBox.InnerLeftContent>
+                <ctl:LineIcon Icon="search" Size="15" Margin="8,0,0,0" Foreground="{DynamicResource B.TextSecondary}" />
+              </TextBox.InnerLeftContent>
+              <TextBox.InnerRightContent>
+                <Button Classes="icon small" IsVisible="{Binding Tree.IsSearching}" Click="ClearSearch" ToolTip.Tip="{DynamicResource S.Tip.ClearSearch}">
+                  <ctl:LineIcon Icon="x" Size="13" />
+                </Button>
+              </TextBox.InnerRightContent>
+            </TextBox>
+            <Button Grid.Column="1" x:Name="AddButton" Classes="primary" Margin="6,0,0,0" Width="34" Height="32" Padding="0"
+                    HorizontalContentAlignment="Center" ToolTip.Tip="{DynamicResource S.Tip.New}" Click="ShowNewMenu">
+              <ctl:LineIcon Icon="plus" Size="16" />
+            </Button>
+          </Grid>
+
+          <!-- Shared (team) data source: who edits -->
+          <Border DockPanel.Dock="Top" Classes="notice sharedbar" Classes.warning="{Binding IsReadOnly}" Margin="10,2,10,6" Padding="10,7"
+                  IsVisible="{Binding IsShared}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <ctl:LineIcon Icon="{Binding SharedIcon}" Size="15" Margin="0,0,8,0" VerticalAlignment="Center"
+                            Foreground="{DynamicResource B.AccentText}" />
+              <TextBlock Grid.Column="1" Text="{Binding SharedText}" Classes="small" TextWrapping="Wrap" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Classes="ghost small" Padding="8,3" Margin="6,0,0,0" IsVisible="{Binding IsReadOnly}"
+                      Command="{Binding TakeOverCommand}" ToolTip.Tip="{Binding TakeOverTip}">
+                <ctl:IconLabel Icon="pencil" Text="{DynamicResource S.Shared.Edit}" />
+              </Button>
+            </Grid>
+          </Border>
+
+          <!-- Mode tools (profiles: new profile, recent: last / most used); the rail already names the mode -->
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="16,2,10,4" x:Name="ModeHeader" IsVisible="False">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2" IsVisible="{Binding IsRecentMode}">
+              <ToggleButton Classes="seg" IsChecked="{Binding !RecentMostUsed}" Command="{Binding SetRecentModeCommand}" CommandParameter="recent"
+                            ToolTip.Tip="{DynamicResource S.Rail.Recent}">
+                <ctl:IconLabel Icon="history" Text="{DynamicResource S.Recent.Last}" />
+              </ToggleButton>
+              <ToggleButton Classes="seg" IsChecked="{Binding RecentMostUsed}" Command="{Binding SetRecentModeCommand}" CommandParameter="most"
+                            ToolTip.Tip="{DynamicResource S.Recent.MostTip}">
+                <ctl:IconLabel Icon="trending-up" Text="{DynamicResource S.Recent.Most}" />
+              </ToggleButton>
+            </StackPanel>
+            <Button Grid.Column="1" Classes="icon" Width="30" Height="30" IsVisible="{Binding IsProfilesMode}" Command="{Binding NewProfileCommand}"
+                    ToolTip.Tip="{DynamicResource S.Profile.New}">
+              <ctl:LineIcon Icon="plus" Size="21" />
+            </Button>
+          </Grid>
+
+          <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource B.Border}" BorderThickness="0,1,0,0" Padding="6,5">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+              <Button Classes="ghost" Padding="6,4" Click="ShowSourceMenu" ToolTip.Tip="{DynamicResource S.Tip.Source}" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <ctl:LineIcon Icon="{Binding SourceIcon}" Size="16" Foreground="{DynamicResource B.AccentText}" Tint="{Binding SourceBrush}" />
+                  <TextBlock Text="{Binding SourceName}" MaxWidth="130" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontSize="12" />
+                  <ctl:LineIcon Icon="chevron-down" Size="12" Foreground="{DynamicResource B.TextSecondary}" />
+                </StackPanel>
+              </Button>
+              <Button Grid.Column="1" Classes="icon treebar" Click="ShowSortMenu" ToolTip.Tip="{DynamicResource S.Tip.Sort}">
+                <ctl:LineIcon Icon="arrow-up-down" Size="17" />
+              </Button>
+              <Button Grid.Column="2" Classes="icon treebar" Command="{Binding ImportCommand}" ToolTip.Tip="{DynamicResource S.Tip.Import}">
+                <ctl:LineIcon Icon="file-down" Size="17" />
+              </Button>
+              <Button Grid.Column="3" Classes="icon treebar" Command="{Binding ExportCommand}" ToolTip.Tip="{DynamicResource S.Tip.Export}">
+                <ctl:LineIcon Icon="file-up" Size="17" />
+              </Button>
+              <Button Grid.Column="4" Classes="icon treebar" Click="ShowMoreMenu" ToolTip.Tip="{DynamicResource S.Tip.More}">
+                <ctl:LineIcon Icon="ellipsis-vertical" Size="17" />
+              </Button>
+            </Grid>
+          </Border>
+
+          <Panel>
+            <ListBox x:Name="TreeList" Classes="tree" ItemsSource="{Binding Tree.Rows}" SelectionMode="Multiple"
+                     DragDrop.AllowDrop="True" IsVisible="{Binding !IsProfilesMode}">
+              <ListBox.ItemTemplate>
+                <DataTemplate DataType="vm:TreeRow">
+                  <Border Classes="row" Classes.compact="{Binding IsCompact}" Classes.appear="{Binding Appear}" Classes.leaving="{Binding Leaving}" Classes.dropBefore="{Binding DropBefore}"
+                          Classes.dropAfter="{Binding DropAfter}" Classes.dropInto="{Binding DropInto}" Classes.featureoff="{Binding IsFeatureOff}" ToolTip.Tip="{Binding Tooltip}"
+                          ToolTip.ShowDelay="900">
+                    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto,Auto" Margin="{Binding Indent}">
+                      <Border Width="3" Height="16" CornerRadius="2" Margin="0,0,3,0" Background="{Binding StripeBrush}" IsVisible="{Binding HasStripe}" />
+                      <Panel Grid.Column="1" Width="20">
+                        <Button Classes="expander" IsVisible="{Binding HasChildren}" Click="ToggleExpand" Focusable="False">
+                          <ctl:LineIcon Icon="{Binding ExpanderIcon}" Size="13" />
+                        </Button>
+                      </Panel>
+                      <Panel Grid.Column="2" Margin="2,0,8,0">
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="16" Foreground="{DynamicResource B.TextSecondary}" Tint="{Binding IconBrush}" />
+                        <Ellipse Classes="livedot" Classes.on="{Binding IsOnline}" Classes.off="{Binding IsOffline}" IsVisible="{Binding HasStatus}"
+                                 ToolTip.Tip="{Binding StatusTip}" />
+                      </Panel>
+                      <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" ClipToBounds="True">
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                   FontWeight="{Binding IsMatch, Converter={x:Static v:Converters.BoolToSemiBold}}" />
+                        <TextBlock Text="{Binding Detail}" IsVisible="{Binding HasDetail}" Classes="muted small" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <ctl:LineIcon Grid.Column="4" Icon="triangle-alert" Size="14" Margin="4,0" IsVisible="{Binding NeedsReview}"
+                                    Foreground="{DynamicResource B.WarningText}" />
+                      <Border Grid.Column="5" Classes="pill envbadge" IsVisible="{Binding HasEnv}" Padding="5,0" Margin="4,0">
+                        <TextBlock Text="{Binding EnvText}" FontSize="9.5" FontWeight="SemiBold" />
+                      </Border>
+                      <TextBlock Grid.Column="6" Text="{Binding CountText}" IsVisible="{Binding HasCount}" Classes="muted small" Margin="4,0,2,0" VerticalAlignment="Center" />
+                      <Button Grid.Column="7" Classes="heart" Classes.on="{Binding IsFavorite}" Click="ToggleFavorite" Focusable="False" Margin="2,0,2,0">
+                        <ctl:LineIcon Icon="heart" Size="14" />
+                      </Button>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Connection profiles -->
+            <ScrollViewer IsVisible="{Binding IsProfilesMode}" HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Margin="8,2,8,8" Spacing="6">
+                <ItemsControl ItemsSource="{Binding ProfileItems}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:ProfileItem">
+                      <Border Classes="profile" DoubleTapped="ProfileDoubleTapped" ToolTip.Tip="{Binding Tooltip}" ToolTip.ShowDelay="700">
+                        <Border.ContextMenu>
+                          <ContextMenu>
+                            <MenuItem Header="{DynamicResource S.Profile.Open}" Click="ProfileMenuOpen"><MenuItem.Icon><ctl:LineIcon Icon="circle-play" /></MenuItem.Icon></MenuItem>
+                            <MenuItem Header="{DynamicResource S.Profile.Close}" Click="ProfileMenuCloseSessions"><MenuItem.Icon><ctl:LineIcon Icon="square-x" /></MenuItem.Icon></MenuItem>
+                            <Separator />
+                            <MenuItem Header="{DynamicResource S.Profile.Edit}" Click="ProfileMenuEdit"><MenuItem.Icon><ctl:LineIcon Icon="pencil" /></MenuItem.Icon></MenuItem>
+                            <Separator />
+                            <MenuItem Header="{DynamicResource S.Profile.Delete}" Click="ProfileMenuDelete"><MenuItem.Icon><ctl:LineIcon Icon="trash-2" /></MenuItem.Icon></MenuItem>
+                          </ContextMenu>
+                        </Border.ContextMenu>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                          <Border Classes="profileicon" Background="{Binding IconBackground}">
+                            <ctl:LineIcon Icon="{Binding Icon}" Size="17" Foreground="{DynamicResource B.AccentText}" Tint="{Binding IconBrush}" />
+                          </Border>
+                          <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center" Margin="10,0,6,0">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Summary}" Classes="muted small" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                          <Button Grid.Column="2" Classes="icon accenticon" Click="ProfilePlay" ToolTip.Tip="{DynamicResource S.Profile.Open}">
+                            <ctl:LineIcon Icon="circle-play" Size="20" />
+                          </Button>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <StackPanel x:Name="EmptyProfiles" IsVisible="{Binding !HasProfiles}" Margin="12,24,12,0" Spacing="10">
+                  <ctl:LineIcon Icon="layers" Size="34" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                  <TextBlock Text="{DynamicResource S.Profile.EmptyTitle}" Classes="h3" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                  <TextBlock Text="{DynamicResource S.Profile.EmptyText}" Classes="muted" TextAlignment="Center" TextWrapping="Wrap" />
+                  <Button HorizontalAlignment="Center" Classes="primary" Command="{Binding NewProfileCommand}" Margin="0,6,0,0">
+                    <ctl:IconLabel Icon="plus" Text="{DynamicResource S.Profile.New}" />
+                  </Button>
+                </StackPanel>
+              </StackPanel>
+            </ScrollViewer>
+
+            <!-- Empty data source -->
+            <!-- Same position as the empty profiles list (icon at the same height in every sidebar mode) -->
+            <StackPanel x:Name="EmptyTree" IsVisible="{Binding ShowEmptyTree}" VerticalAlignment="Top" Margin="20,32,20,0" Spacing="10">
+              <ctl:LineIcon Icon="folder-tree" Size="34" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+              <TextBlock Text="{DynamicResource S.Tree.EmptyTitle}" Classes="h3" HorizontalAlignment="Center" />
+              <Button HorizontalAlignment="Center" Classes="primary" Click="ShowNewMenu" Margin="0,6,0,0" Width="190" HorizontalContentAlignment="Center">
+                <ctl:IconLabel Icon="plus" Text="{DynamicResource S.Tree.EmptyNew}" />
+              </Button>
+              <Button HorizontalAlignment="Center" Command="{Binding ImportCommand}" Width="190" HorizontalContentAlignment="Center">
+                <ctl:IconLabel Icon="file-down" Text="{DynamicResource S.Tree.EmptyImport}" />
+              </Button>
+            </StackPanel>
+            <TextBlock x:Name="NoResults" IsVisible="{Binding ShowNoResults}" Text="{DynamicResource S.Tree.NoResults}" Classes="muted"
+                       HorizontalAlignment="Center" Margin="20,32,20,0" TextWrapping="Wrap" />
+
+            <!-- Full encryption: nothing is shown while the vault is locked -->
+            <Border IsVisible="{Binding IsContentHidden}" Background="{DynamicResource B.BgPanel}">
+              <StackPanel VerticalAlignment="Top" Margin="20,32,20,0" Spacing="10">
+                <ctl:LineIcon Icon="lock" Size="34" HorizontalAlignment="Center" Foreground="{DynamicResource B.AccentText}" />
+                <TextBlock Text="{DynamicResource S.Tree.LockedTitle}" Classes="h3" HorizontalAlignment="Center" />
+                <TextBlock Text="{DynamicResource S.Tree.LockedText}" Classes="muted" TextWrapping="Wrap" TextAlignment="Center" />
+                <Button HorizontalAlignment="Center" Classes="primary" Command="{Binding ToggleLockCommand}" Margin="0,6,0,0">
+                  <ctl:IconLabel Icon="lock-open" Text="{DynamicResource S.Vault.Unlock}" />
+                </Button>
+              </StackPanel>
+            </Border>
+          </Panel>
+        </DockPanel>
+      </Border>
+
+      <GridSplitter Grid.Column="2" Classes="panel" Width="5" ResizeDirection="Columns" IsVisible="{Binding TreeVisible}"
+                    x:Name="TreeSplitter" Background="{DynamicResource B.Border}" />
+
+      <!-- ===================================================== Tabs and content -->
+      <DockPanel Grid.Column="3">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Background="{DynamicResource B.BgWindow}" IsVisible="{Binding ShowChrome}">
+          <StackPanel Orientation="Horizontal" Spacing="2" Margin="6,6,4,0" VerticalAlignment="Top">
+            <Button Classes="icon topbar" Command="{Binding ToggleTreeCommand}" ToolTip.Tip="{DynamicResource S.Tip.ToggleTree}">
+              <ctl:LineIcon Icon="panel-left" Size="19" />
+            </Button>
+            <Button Classes="icon topbar" Command="{Binding GoHomeCommand}" ToolTip.Tip="{DynamicResource S.Tip.Home}">
+              <ctl:LineIcon Icon="house" Size="19" />
+            </Button>
+          </StackPanel>
+          <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <StackPanel Orientation="Horizontal">
+              <ItemsControl ItemsSource="{Binding Tabs.Items}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:TabViewModel">
+                    <Border Classes="tab" Classes.selected="{Binding IsSelected}" PointerPressed="TabPressed" PointerReleased="TabReleased"
+                            ToolTip.Tip="{Binding Title}" ToolTip.ShowDelay="1000">
+                      <Border.ContextMenu>
+                        <ContextMenu>
+                          <MenuItem Header="{DynamicResource S.Tabs.Close}" Click="TabMenuClose"><MenuItem.Icon><ctl:LineIcon Icon="x" /></MenuItem.Icon></MenuItem>
+                          <MenuItem Header="{DynamicResource S.Tabs.CloseOthers}" Click="TabMenuCloseOthers"><MenuItem.Icon><ctl:LineIcon Icon="copy-plus" /></MenuItem.Icon></MenuItem>
+                          <MenuItem Header="{DynamicResource S.Tabs.CloseRight}" Click="TabMenuCloseRight"><MenuItem.Icon><ctl:LineIcon Icon="chevron-right" /></MenuItem.Icon></MenuItem>
+                          <Separator />
+                          <MenuItem Header="{DynamicResource S.Tabs.MoveToWindow}" Click="TabMenuMoveWindow"><MenuItem.Icon><ctl:LineIcon Icon="app-window" /></MenuItem.Icon></MenuItem>
+                          <MenuItem Header="{DynamicResource S.Tabs.SplitView}" Click="TabMenuSplit" IsVisible="{Binding CanSplit}"><MenuItem.Icon><ctl:LineIcon Icon="columns-2" /></MenuItem.Icon></MenuItem>
+                          <MenuItem Header="{DynamicResource S.Tabs.Reopen}" InputGesture="Ctrl+Shift+T" Click="TabMenuReopen"><MenuItem.Icon><ctl:LineIcon Icon="undo-2" /></MenuItem.Icon></MenuItem>
+                        </ContextMenu>
+                      </Border.ContextMenu>
+                      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <Border Grid.ColumnSpan="4" Height="3" VerticalAlignment="Top" Margin="-10,0,-4,0" CornerRadius="3,3,0,0"
+                                Background="{Binding StripeBrush}" IsVisible="{Binding HasStripe}" />
+                        <Border Grid.ColumnSpan="4" Classes="tabactive" Height="2" VerticalAlignment="Bottom" Margin="-10,0,-4,0" IsVisible="{Binding IsSelected}" />
+                        <ctl:LineIcon Icon="{Binding Icon}" Size="15" Margin="0,0,8,0" Tint="{Binding IconBrush}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <Ellipse Grid.Column="2" Width="7" Height="7" Margin="6,0,0,0" VerticalAlignment="Center" Fill="{Binding EnvBrush}" IsVisible="{Binding HasEnvDot}" />
+                        <Button Grid.Column="3" Classes="icon close" Width="26" Height="26" Margin="6,0,0,0" Click="TabCloseClick" Focusable="False"
+                                ToolTip.Tip="{DynamicResource S.Tabs.Close}">
+                          <ctl:LineIcon Icon="x" Size="16" />
+                        </Button>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Button Classes="icon topbar" Margin="4,8,0,0" VerticalAlignment="Top" Command="{Binding NewTabCommand}" ToolTip.Tip="{DynamicResource S.Tip.NewTab}">
+                <ctl:LineIcon Icon="plus" Size="20" />
+              </Button>
+            </StackPanel>
+          </ScrollViewer>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" Margin="4,6,8,0" VerticalAlignment="Top">
+            <Button Classes="icon topbar" Classes.on="{Binding IsLocked}" IsVisible="{Binding HasPassword}" Command="{Binding ToggleLockCommand}"
+                    ToolTip.Tip="{Binding VaultTip}">
+              <ctl:LineIcon Icon="{Binding VaultIcon}" Size="18" />
+            </Button>
+            <Button Classes="icon topbar" Click="ShowPalette" IsVisible="{Binding ShowPalette}" ToolTip.Tip="{DynamicResource S.Palette.Tip}">
+              <ctl:LineIcon Icon="command" Size="18" />
+            </Button>
+            <Button Classes="icon topbar" Command="{Binding NewWindowCommand}" ToolTip.Tip="{DynamicResource S.Menu.NewWindow}">
+              <ctl:LineIcon Icon="app-window" Size="19" />
+            </Button>
+            <Button Classes="icon topbar accenticon" Command="{Binding OpenDashboardCommand}" ToolTip.Tip="{DynamicResource S.Tip.Dashboard}" IsVisible="{Binding ShowDashboard}">
+              <Button.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="{DynamicResource S.Dash.Open}" Command="{Binding OpenDashboardCommand}"><MenuItem.Icon><ctl:LineIcon Icon="layout-dashboard" /></MenuItem.Icon></MenuItem>
+                  <MenuItem Header="{DynamicResource S.Dash.OpenWindow}" Command="{Binding OpenDashboardWindowCommand}"><MenuItem.Icon><ctl:LineIcon Icon="app-window" /></MenuItem.Icon></MenuItem>
+                  <Separator />
+                  <MenuItem Header="{DynamicResource S.Dash.Settings}" Command="{Binding OpenSettingsPageCmdCommand}" CommandParameter="dashboard"><MenuItem.Icon><ctl:LineIcon Icon="settings" /></MenuItem.Icon></MenuItem>
+                </ContextMenu>
+              </Button.ContextMenu>
+              <ctl:LineIcon Icon="layout-dashboard" Size="19" />
+            </Button>
+            <Button Classes="icon topbar" Click="ShowWindowMenu" ToolTip.Tip="{DynamicResource S.Tip.Menu}">
+              <ctl:LineIcon Icon="ellipsis-vertical" Size="20" />
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <Panel Background="{DynamicResource B.BgContent}">
+          <TransitioningContentControl x:Name="TabContent" Content="{Binding Tabs.Selected}" />
+
+          <!-- Kiosk / fullscreen: small exit button in the top right corner -->
+          <Button Classes="kioskexit" IsVisible="{Binding IsKiosk}" Command="{Binding ExitKioskCommand}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                  Margin="0,8,10,0" ToolTip.Tip="{DynamicResource S.Kiosk.Exit}">
+            <ctl:IconLabel Icon="minimize" Text="{DynamicResource S.Kiosk.Exit}" />
+          </Button>
+
+          <Border Classes="toast" Classes.error="{Binding ToastIsError}" IsVisible="{Binding HasToast}"
+                  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="20" MaxWidth="480">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <ctl:LineIcon Icon="info" Size="17" Margin="0,0,10,0" Foreground="{DynamicResource B.AccentText}" />
+              <TextBlock Grid.Column="1" Text="{Binding Toast}" TextWrapping="Wrap" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Classes="icon small" Margin="10,0,0,0" Command="{Binding CloseToastCommand}">
+                <ctl:LineIcon Icon="x" Size="13" />
+              </Button>
+            </Grid>
+          </Border>
+        </Panel>
+      </DockPanel>
+    </Grid>
+
+    <!-- ===================================================== Status bar -->
+    <Border Grid.Row="1" Background="{DynamicResource B.BgRail}" BorderBrush="{DynamicResource B.Border}" BorderThickness="0,1,0,0" Padding="10,3"
+            IsVisible="{Binding ShowStatusBar}">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+          <ctl:LineIcon Icon="{Binding SourceIcon}" Size="13" Foreground="{DynamicResource B.TextSecondary}" Tint="{Binding SourceBrush}" />
+          <TextBlock Text="{Binding SourceName}" Classes="small muted" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" Margin="16,0,0,0">
+          <TextBlock Text="{Binding EntryCountText}" Classes="small muted" VerticalAlignment="Center" />
+          <StackPanel Orientation="Horizontal" Spacing="5" IsVisible="{Binding HasSessions}">
+            <ctl:LineIcon Icon="plug-zap" Size="13" Foreground="{DynamicResource B.SuccessText}" />
+            <TextBlock Text="{Binding SessionText}" Classes="small muted" VerticalAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+        <Border Grid.Column="2" Classes="pill warning" Margin="12,0,0,0" IsVisible="{Binding IsNetworkStore}" Padding="7,0">
+          <TextBlock Text="{DynamicResource S.Status.Network}" FontSize="10.5" />
+        </Border>
+        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsClipboardPending}" Margin="0,0,14,0">
+          <ctl:LineIcon Icon="clipboard" Size="13" Foreground="{DynamicResource B.WarningText}" />
+          <TextBlock Text="{Binding ClipboardText}" Classes="small warning" VerticalAlignment="Center" />
+        </StackPanel>
+        <Border Grid.Column="5" Classes="pill" Margin="0,0,10,0" IsVisible="{Binding IsPortable}" Padding="7,0">
+          <TextBlock Text="{DynamicResource S.Status.Portable}" FontSize="10.5" />
+        </Border>
+        <Button Grid.Column="6" Classes="ghost" Padding="6,1" Command="{Binding VaultStatusClickCommand}" ToolTip.Tip="{Binding VaultTip}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <ctl:LineIcon Icon="{Binding VaultIcon}" Size="13" Foreground="{DynamicResource B.AccentText}" />
+            <TextBlock Text="{Binding VaultText}" Classes="small" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="using:Nexode.App.ViewModels.Sessions"
+             xmlns:ss="using:Nexode.App.Views.Sessions"
+             xmlns:ctl="using:Nexode.App.Controls"
+             x:Class="Nexode.App.Views.Sessions.FileBrowserView"
+             x:DataType="s:FileBrowserTabViewModel">
+
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Classes="sessionbar">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Ellipse Width="8" Height="8" Classes="statedot" Classes.on="{Binding IsConnected}" Classes.off="{Binding IsEnded}" />
+          <Border Classes="pill accent" Padding="7,0"><TextBlock Text="{Binding ProtocolText}" FontSize="10.5" /></Border>
+          <TextBlock Text="{Binding StatusText}" Classes="small" VerticalAlignment="Center" />
+          <Border Classes="pill info" IsVisible="{Binding HasEdits}" ToolTip.Tip="{DynamicResource S.Files.EditingTip}">
+            <ctl:IconLabel Icon="file-pen" Text="{Binding EditCount, StringFormat={}{0}}" />
+          </Border>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2">
+          <Button Classes="ghost small" Command="{Binding CompareFoldersCommand}" IsVisible="{Binding SyncEnabled}" IsEnabled="{Binding IsConnected}"
+                  ToolTip.Tip="{DynamicResource S.Sync.Tip}" Margin="0,0,6,0">
+            <ctl:IconLabel Icon="{Binding SyncButtonIcon}" Text="{Binding SyncButtonText}" />
+          </Button>
+          <Button Classes="icon small" Command="{Binding ReconnectCommand}" ToolTip.Tip="{DynamicResource S.Session.Reconnect}"><ctl:LineIcon Icon="refresh-cw" Size="17" /></Button>
+          <Button Classes="icon small danger" Command="{Binding DisconnectCommand}" IsEnabled="{Binding IsConnected}" ToolTip.Tip="{DynamicResource S.Session.Disconnect}"><ctl:LineIcon Icon="unplug" Size="17" /></Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid x:Name="Body" RowDefinitions="*,Auto,0">
+      <Panel>
+        <Grid x:Name="Panes" ColumnDefinitions="*,9,*" Margin="10,8,10,4">
+          <GridSplitter Grid.Column="1" Classes="thin" ResizeDirection="Columns" />
+        </Grid>
+        <ss:SessionOverlay />
+      </Panel>
+      <!-- Transfer queue (height adjustable with the thin divider above it) -->
+      <GridSplitter Grid.Row="1" Classes="thin horizontal" ResizeDirection="Rows" IsVisible="{Binding HasTransfers}" />
+      <Border Grid.Row="2" IsVisible="{Binding HasTransfers}">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="12,6,8,2">
+            <TextBlock Text="{DynamicResource S.Transfer.Title}" Classes="section" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Classes="ghost small" Command="{Binding ClearTransfersCommand}">
+              <ctl:IconLabel Icon="list-x" Text="{DynamicResource S.Transfer.Clear}" />
+            </Button>
+          </Grid>
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Transfers}" Margin="8,0,8,6">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="s:TransferItem">
+                  <Grid ColumnDefinitions="Auto,*,160,130,Auto" Height="28">
+                    <ctl:LineIcon Icon="{Binding Icon}" Size="14" Margin="4,0,10,0" Foreground="{DynamicResource B.AccentText}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    <ProgressBar Grid.Column="2" Value="{Binding Percent}" Maximum="100" Height="4" MinWidth="0" Margin="10,0" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="{Binding StateText}" Classes="small muted" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Error}" />
+                    <Button Grid.Column="4" Classes="icon small" IsVisible="{Binding CanCancel}" ToolTip.Tip="{DynamicResource S.Cancel}"
+                            Command="{Binding $parent[UserControl].((s:FileBrowserTabViewModel)DataContext).CancelTransferCommand}" CommandParameter="{Binding}">
+                      <ctl:LineIcon Icon="x" Size="13" />
+                    </Button>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>
